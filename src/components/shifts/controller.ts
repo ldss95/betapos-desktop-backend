@@ -8,7 +8,7 @@ export default {
 		const { amount } = req.body;
 
 		Shift.create({ startAmount: amount, userId: req.session!.user.id })
-			.then(() => res.sendStatus(201))
+			.then((results) => res.status(201).send(results))
 			.catch((error) => {
 				res.sendStatus(500);
 				throw error;
