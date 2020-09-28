@@ -91,8 +91,12 @@ export default {
 		});
 	},
 	isLoggedIn: (req: Request, res: Response, next: NextFunction) => {
-		if (req.session!.user) next();
-		else res.status(401).send('Ninguna sesion iniciada');
+		if (!req.session!.user) {
+			res.status(401).send('Ninguna sesion iniciada');
+			return;
+		}
+
+		next();
 	},
 	isAdmin: (req: Request, res: Response, next: NextFunction) => {
 		if (req.session!.user.type == 'ADMIN') next();
