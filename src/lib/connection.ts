@@ -4,8 +4,7 @@ export const sequelize = new Sequelize({
 	dialect: 'mysql',
 	dialectOptions: {
 		dateStrings: true,
-		typeCast: true,
-		useUTC: false
+		typeCast: true
 	},
 	define: {
 		charset: 'utf8',
