@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 
 import { sequelize } from '../../lib/connection';
+import { TicketAttr } from './interface';
 import { User } from '../users/model';
 import { Shift } from '../shifts/model';
 import { Product } from '../products/model';
