@@ -25,6 +25,11 @@ const Ticket = sequelize.define<TicketAttr>(
 			type: DataTypes.FLOAT,
 			allowNull: false
 		},
+		discount: {
+			type: DataTypes.FLOAT,
+			allowNull: false,
+			defaultValue: 0
+		},
 		status: {
 			type: DataTypes.STRING,
 			allowNull: false,
