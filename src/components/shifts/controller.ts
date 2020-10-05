@@ -40,5 +40,17 @@ export default {
 				res.sendStatus(500);
 				throw error;
 			});
+	},
+	finishShift: (req: Request, res: Response) => {
+		const { id, endAmount } = req.body;
+		Shift.update(
+			{ endAmount, endTime: moment().format('HH:mm:ss') },
+			{ where: { id } }
+		)
+			.then(() => res.sendStatus(204))
+			.catch((error) => {
+				res.sendStatus(500);
+				throw error;
+			});
 	}
 };

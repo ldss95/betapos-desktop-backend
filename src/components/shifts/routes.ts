@@ -7,7 +7,8 @@ import controller from './controller';
 router
 	.route('/')
 	.post(auth.isLoggedIn, auth.verifyToken, controller.create)
-	.get(auth.isLoggedIn, auth.verifyToken, controller.getAll);
+	.get(auth.isLoggedIn, auth.verifyToken, controller.getAll)
+	.put(auth.isLoggedIn, auth.verifyToken, controller.finishShift);
 
 router.get(
 	'/current',
