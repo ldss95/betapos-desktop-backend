@@ -5,6 +5,4 @@ export interface TicketProductAttr extends Model {
 	productId: number;
 	quantity: number;
 	price: number;
-	createdAt?: string;
-	updatedAt?: string;
 }
