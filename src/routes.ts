@@ -15,4 +15,6 @@ router.use('/tickets', tickets);
 router.use('/users', users);
 router.use('/settings', settings);
 
+router.all('*', (req: Request, res: Response) => res.sendStatus(404));
+
 export default router;
