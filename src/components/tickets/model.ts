@@ -5,6 +5,7 @@ import { TicketAttr } from './interface';
 import { User } from '../users/model';
 import { Shift } from '../shifts/model';
 import { Product } from '../products/model';
+import { TicketProduct } from '../ticket-product/model';
 
 const Ticket = sequelize.define<TicketAttr>(
 	'Ticket',
@@ -47,31 +48,9 @@ const Ticket = sequelize.define<TicketAttr>(
 	}
 );
 
-const TicketProduct = sequelize.define('TicketProduct', {
-	ticketId: {
-		type: DataTypes.UUID,
-		allowNull: false
-	},
-	productId: {
-		type: DataTypes.INTEGER,
-		allowNull: false
-	},
-	quantity: {
-		type: DataTypes.TINYINT,
-		allowNull: false,
-		defaultValue: 1
-	},
-	price: {
-		type: DataTypes.FLOAT,
-		allowNull: false
-	}
-});
-
-TicketProduct.removeAttribute('id');
-
 Ticket.belongsTo(User, { foreignKey: 'userId' });
 Ticket.belongsTo(Shift, { foreignKey: 'shiftId' });
 Ticket.hasMany(TicketProduct, { foreignKey: 'ticketId' });
 TicketProduct.belongsTo(Product, { foreignKey: 'productId' });
 
-export { Ticket, TicketProduct };
+export { Ticket };
