@@ -4,7 +4,7 @@ import { TicketProductAttr } from '../ticket-product/interface';
 
 export interface TicketAttr extends Model {
 	id?: string;
-	ticketNumber: number;
+	ticketNumber: number | string;
 	amount: number;
 	status: 'IN PROCESS' | 'DONE' | 'PAUSED' | 'CANCELLED';
 	TicketProducts?: TicketProductAttr[];
