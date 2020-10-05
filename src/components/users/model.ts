@@ -1,9 +1,10 @@
 import { DataTypes } from 'sequelize';
 
 import { sequelize } from '../../lib/connection';
+import { UserAttr } from './interface';
 import { duiIsValid } from '../../lib/helpers';
 
-const User = sequelize.define('User', {
+const User = sequelize.define<UserAttr>('User', {
 	id: {
 		type: DataTypes.SMALLINT,
 		primaryKey: true,
