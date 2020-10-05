@@ -4,7 +4,8 @@ export const sequelize = new Sequelize({
 	dialect: 'mysql',
 	dialectOptions: {
 		dateStrings: true,
-		typeCast: true
+		typeCast: true,
+		useUTC: false
 	},
 	define: {
 		charset: 'utf8',
@@ -18,3 +19,5 @@ export const sequelize = new Sequelize({
 	database: process.env.DB_NAME,
 	logging: false
 });
+
+//sequelize.sync({ alter: true });
