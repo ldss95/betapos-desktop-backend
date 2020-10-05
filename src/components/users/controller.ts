@@ -1,14 +1,24 @@
 import { Request, Response } from 'express';
-import { User } from './model'
+import bcrypt from 'bcrypt';
+import { ValidationError } from 'sequelize';
+
+import { User } from './model';
 
 export default {
-	getAll: (req: Request, res: Response) => {
-	   User.findAll()
-		.then(users => {
-			res.status(200).send(users)
-		}).catch(error => {
-			res.sendStatus(500)
-			throw error
-		})
+	update: (req: Request, res: Response) => {
+		const { id } = req.session!.user;
+		const user = req.body;
+		if (user.password) user.password = bcrypt.hashSync(user.password, 13);
+
+		User.update(user, { where: { id } })
+			.then(() => res.sendStatus(204))
+			.catch((error) => {
+				if (error instanceof ValidationError) {
+					res.status(400).send('Cedula Invalida');
+					return;
+				}
+				res.sendStatus(500);
+				throw error;
+			});
 	}
-	}
+};

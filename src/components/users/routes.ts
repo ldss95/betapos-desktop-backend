@@ -3,5 +3,6 @@ const router: Router = Router();
 
 import controller from './controller';
 
-router.get('/', controller.getAll)
+router.route('/').put(controller.update);
+
 export default router;
