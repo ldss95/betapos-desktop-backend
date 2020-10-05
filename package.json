@@ -31,7 +31,7 @@
     "html-pdf": "^2.2.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.27.0",
-    "mysql2": "^2.1.0",
+    "mysql2": "^2.2.5",
     "sequelize": "^6.3.5",
     "shortid": "^2.2.15",
     "socket.io": "^2.3.0"
