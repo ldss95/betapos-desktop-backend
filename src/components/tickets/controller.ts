@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import axios from 'axios';
 
-import { Ticket, TicketProduct } from './model';
+import { Product } from '../products/model';
+import { Ticket } from './model';
+import { TicketProduct } from '../ticket-product/model';
 const API_URL = process.env.API_URL;
 
 export default {
@@ -21,5 +23,30 @@ export default {
 				res.sendStatus(500);
 				throw error;
 			});
+	},
+	getOne: async (req: Request, res: Response) => {
+		try {
+			const { ticketNumber } = req.params;
+
+			const ticket = await Ticket.findOne({
+				raw: true,
+				where: { ticketNumber }
+			});
+
+			if (!ticket) {
+				res.sendStatus(204);
+				return;
+			}
+
+			ticket.TicketProducts = await TicketProduct.findAll({
+				where: { ticketId: ticket!.id },
+				include: [Product]
+			});
+
+			res.status(200).send(ticket);
+		} catch (error) {
+			res.sendStatus(500);
+			throw error;
+		}
 	}
 };
