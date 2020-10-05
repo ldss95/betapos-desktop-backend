@@ -9,6 +9,12 @@ router
 	.post(auth.isLoggedIn, auth.verifyToken, controller.create)
 	.get(auth.isLoggedIn, auth.verifyToken, controller.getAll);
 
+router.get(
+	'/table',
+	auth.isLoggedIn,
+	auth.verifyToken,
+	controller.getAllForTable
+);
 router.get('/:id', auth.isLoggedIn, auth.verifyToken, controller.getOne);
 
 export default router;
