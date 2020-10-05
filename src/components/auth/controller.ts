@@ -57,6 +57,8 @@ export default {
 					nickName,
 					name: user.name,
 					role: user.role,
+					phone: user.phone,
+					dui: user.dui,
 					id: user.id
 				});
 			})
