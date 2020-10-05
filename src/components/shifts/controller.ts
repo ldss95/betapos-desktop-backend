@@ -25,6 +25,25 @@ export default {
 				throw error;
 			});
 	},
+	getOne: (req: Request, res: Response) => {
+		const { id } = req.params;
+		const query = `SELECT
+				(SELECT SUM(amount) FROM Tickets WHERE shiftId = '${id}') AS total,
+				(SELECT SUM(discount) FROM Tickets WHERE shiftId = '${id}') AS discounts,
+				(SELECT SUM(amount) FROM CashFlows WHERE shiftId = '${id}' AND type = 'IN') AS cashIn,
+				(SELECT SUM(amount) FROM CashFlows WHERE shiftId = '${id}' AND type = 'OUT') AS cashOut
+			`;
+
+		Shift.sequelize
+			?.query(query, { plain: true })
+			.then((results) => {
+				res.status(200).send(results);
+			})
+			.catch((error) => {
+				res.sendStatus(500);
+				throw error;
+			});
+	},
 	getCurrentShift: (req: Request, res: Response) => {
 		const today = moment().format('YYYY-MM-DD');
 		Shift.findOne({

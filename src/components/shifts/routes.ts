@@ -17,4 +17,6 @@ router.get(
 	controller.getCurrentShift
 );
 
+router.get('/:id', auth.isLoggedIn, auth.verifyToken, controller.getOne);
+
 export default router;
