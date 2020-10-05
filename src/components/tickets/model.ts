@@ -5,7 +5,7 @@ import { User } from '../users/model';
 import { Shift } from '../shifts/model';
 import { Product } from '../products/model';
 
-const Ticket = sequelize.define(
+const Ticket = sequelize.define<TicketAttr>(
 	'Ticket',
 	{
 		id: {
