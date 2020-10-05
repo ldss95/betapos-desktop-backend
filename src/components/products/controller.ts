@@ -1,13 +1,15 @@
 import { Request, Response } from 'express';
-import { QueryTypes } from 'sequelize';
+import { Op, AndOperator } from 'sequelize';
 
-import { Product } from './model';
+import { Product, Barcode } from './model';
 import { sequelize } from '../../lib/connection';
 
 export default {
 	create: (req: Request, res: Response) => {},
 	getAll: (req: Request, res: Response) => {
-		Product.findAll()
+		Product.findAll({
+			include: [Barcode]
+		})
 			.then((products) => res.status(200).send(products))
 			.catch((error) => {
 				res.sendStatus(500);
