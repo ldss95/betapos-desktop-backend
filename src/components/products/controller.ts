@@ -69,9 +69,9 @@ export default {
 				p.*,
 				b.barcode
 			FROM
-				products p
+				Products p
 			INNER JOIN
-				barcodes b ON b.productId = p.id
+				Barcodes b ON b.productId = p.id
 			WHERE
 				p.id = '${id}' OR
 				p.reference = '${id}' OR 
