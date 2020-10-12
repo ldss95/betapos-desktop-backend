@@ -6,6 +6,13 @@ import { TicketProductAttr } from './interface';
 const TicketProduct = sequelize.define<TicketProductAttr>(
 	'TicketProduct',
 	{
+		id: {
+			type: DataTypes.UUID,
+			defaultValue: DataTypes.UUIDV4,
+			allowNull: false,
+			unique: true,
+			primaryKey: true
+		},
 		ticketId: {
 			type: DataTypes.UUID,
 			allowNull: false
@@ -26,7 +33,5 @@ const TicketProduct = sequelize.define<TicketProductAttr>(
 	},
 	{ timestamps: false }
 );
-
-TicketProduct.removeAttribute('id');
 
 export { TicketProduct };
