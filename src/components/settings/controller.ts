@@ -5,6 +5,7 @@ import { sequelize } from '../../lib/connection';
 import { Product } from '../products/model';
 import { Barcode } from '../products/model';
 import { User } from '../users/model';
+import { Meta } from '../meta/model';
 
 export default {
 	setShop: async (req: Request, res: Response) => {
@@ -38,6 +39,12 @@ export default {
 			const usersRes = await axios.get(`${API_URL}/users`);
 			res.write('data: Guardando lista de usuarios\n\n');
 			await User.bulkCreate(usersRes.data);
+
+			res.write('data: Onteniendo ultimo Ticket Number\n\n');
+			const ticketRes = await axios.get(`${API_URL}/tickets/last/${shopId}`);
+			res.write('data: Guardando ultimo Ticket Number\n\n');
+			const { lastTicketNumber } = ticketRes.data
+			await Meta.create({ shopId, lastTicketNumber })
 
 			res.write('data: done\n\n');
 			res.end();
