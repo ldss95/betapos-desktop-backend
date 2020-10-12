@@ -101,7 +101,7 @@ export default {
 		next();
 	},
 	isAdmin: (req: Request, res: Response, next: NextFunction) => {
-		if (req.session!.user.type == 'ADMIN') next();
+		if (req.session!.user.role == 'ADMIN') next();
 		else
 			res.status(403).send(
 				'Se requieren privilegios de administrador para continuar.'
