@@ -6,6 +6,7 @@ import { User } from '../users/model';
 import { Shift } from '../shifts/model';
 import { Product } from '../products/model';
 import { TicketProduct } from '../ticket-product/model';
+import { Meta } from '../meta/model';
 
 const Ticket = sequelize.define<TicketAttr>(
 	'Ticket',
@@ -43,7 +44,14 @@ const Ticket = sequelize.define<TicketAttr>(
 			beforeCreate: async (model: any) => {
 				try {
 					const max = await Ticket.max('ticketNumber');
-					const last = Number(max) | 0;
+					let last = 0;
+					if (max) {
+						last = Number(max) | 0;
+					} else {
+						const meta = await Meta.findOne()
+						last = meta!.lastTicketNumber
+					}
+
 					model.ticketNumber = last + 1;
 				} catch (error) {
 					throw error;
