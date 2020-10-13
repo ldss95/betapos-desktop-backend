@@ -1,8 +1,11 @@
 import { Router } from 'express'
 const router: Router = Router()
 
-import { sync } from './controller'
+import auth from '../auth/controller'
+import { sync, getUnsynchronized } from './controller'
 
-router.route('/').post(sync)
+router.route('/')
+    .get(auth.isLoggedIn, auth.verifyToken, auth.isAdmin, getUnsynchronized)
+    .post(sync)
 
 export default router

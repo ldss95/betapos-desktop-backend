@@ -36,6 +36,15 @@ const create = (url: string, data: object) => {
 	})
 }
 
+const getUnsynchronized = (req: Request, res: Response) => {
+	Sync.findAll({ where: { status: 'PENDING' } })
+		.then(records => res.status(200).send(records))
+		.catch(error => {
+			res.sendStatus(500)
+			throw error
+		})
+}
+
 interface SendToApiInput {
 	path: string;
 	data: object;
