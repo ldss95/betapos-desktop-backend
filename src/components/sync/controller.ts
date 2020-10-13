@@ -49,12 +49,13 @@ interface SendToApiInput {
 	path: string;
 	data: object;
 	isNew: boolean,
+	reTry: boolean;
 	attemp: number,
 	callback: CallableFunction
 }
 
 const sendToAPI = (input: SendToApiInput) => {
-	const { path, data, isNew, callback, attemp } = input
+	const { path, data, isNew, callback, reTry, attemp } = input
 
 	const hostname = (process.env.NODE_ENV == 'production')
 		? process.env.API_URL
@@ -84,7 +85,7 @@ const sendToAPI = (input: SendToApiInput) => {
 	});
 
 	req.on('error', (error) => {
-		if (attemp < 3) {
+		if (reTry && attemp < 3) {
 			setTimeout(() => {
 				sendToAPI({
 					...input,
