@@ -109,4 +109,4 @@ const sendToAPI = (input: SendToApiInput) => {
 	req.end();
 }
 
-export { create, sendToAPI, sync}
+export { create, sendToAPI, sync, getUnsynchronized }
