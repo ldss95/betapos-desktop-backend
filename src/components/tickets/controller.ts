@@ -28,6 +28,7 @@ export default {
 
 			sendToAPI({
 				path: '/tickets', data: { ticket: savedTicket },
+				reTry: true,
 				attemp: 1,
 				isNew: true,
 				callback: () => {}
