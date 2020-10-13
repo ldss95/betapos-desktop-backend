@@ -21,7 +21,7 @@ const Meta = sequelize.define<MetaAttr>('Meta', {
 	},
 	sendEmails: {
 		type: DataTypes.STRING,
-		allowNull: false,
+		allowNull: true,
 		get() {
 			const value = this.getDataValue('sendEmails')
 			return (value) ? value.split(','): value
@@ -33,7 +33,5 @@ const Meta = sequelize.define<MetaAttr>('Meta', {
 }, { timestamps: false })
 
 Meta.removeAttribute('id')
-
-//Meta.sync({ alter: true })
 
 export { Meta }
