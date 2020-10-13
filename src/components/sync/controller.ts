@@ -4,6 +4,9 @@ import http from 'http';
 import { Sync } from './model'
 
 const sync = (req: Request, res: Response) => {
+	const { wait } = req.body
+	let responseIsSend = false
+
 	Sync.findAll({ where: { status: 'PENDING' } })
 		.then(records => {
 			records.forEach(record => {
@@ -11,19 +14,44 @@ const sync = (req: Request, res: Response) => {
 					path: record.path,
 					data: record.data,
 					isNew: false,
+					reTry: (wait) ? false: true, //If client is waiting for response, no re try send to api when fail.
 					attemp: 1,
 					callback: (isSaved: boolean) => {
+						if (!isSaved && !responseIsSend) {
+							res.status(200).send({ allIsDone: false })
+							responseIsSend = true
+							return
+						}
+
 						if (isSaved) {
 							record.update({ status: 'DONE' })
 								.catch(error => {
 									throw error
 								})
+							
+							/*
+								If the client is waiting response,
+								verify if all done, then send response.
+							*/
+							if (wait) {
+								records = records.filter(item => item.id != record.id)
+							
+								if (records.length == 0) {
+									res.status(200).send({ allIsDone: true })
+								}
+							}
 						}
 					}
 				})
 			})
 
-			res.sendStatus(204)
+			/*
+				If the client is not waiting response,
+				end http request and continue process
+			*/
+			if (!wait) {
+				res.sendStatus(202)
+			}
 		}).catch(error => {
 			res.sendStatus(500)
 			throw error
