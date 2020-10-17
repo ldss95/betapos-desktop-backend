@@ -14,10 +14,10 @@ const CashFlow = sequelize.define<CashFlowAttr>('CashFlow', {
 		allowNull: false
 	},
 	type: {
-		type: DataTypes.STRING(3),
+		type: DataTypes.STRING(5),
 		allowNull: false,
 		validate: {
-			isIn: [['IN', 'OUT']]
+			isIn: [['IN', 'OUT', 'CHECK']]
 		}
 	},
 	amount: {
@@ -29,7 +29,19 @@ const CashFlow = sequelize.define<CashFlowAttr>('CashFlow', {
 	},
 	description: {
 		type: DataTypes.STRING,
-		allowNull: false
+		allowNull: true
+	},
+	cashDetail: {
+		type: DataTypes.TEXT,
+		allowNull: true,
+		get() {
+			const cashDetail = this.getDataValue('cashDetail')
+			return (cashDetail) ? JSON.parse(cashDetail) : null
+		},
+		set(value: object[]) {
+			if (value)
+				this.setDataValue('cashDetail', JSON.stringify(value))
+		}
 	},
 	userId: {
 		type: DataTypes.SMALLINT,

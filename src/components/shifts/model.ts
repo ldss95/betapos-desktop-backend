@@ -31,6 +31,18 @@ const Shift = sequelize.define<ShiftAttr>(
 			type: DataTypes.FLOAT,
 			allowNull: true
 		},
+		cashDetail: {
+			type: DataTypes.TEXT,
+			allowNull: true,
+			get() {
+				const cashDetail = this.getDataValue('cashDetail')
+				return (cashDetail) ? JSON.parse(cashDetail) : null
+			},
+			set(value: object[]) {
+				if (value)
+					this.setDataValue('cashDetail', JSON.stringify(value))
+			}
+		},
 		endTime: {
 			type: DataTypes.TIME,
 			allowNull: true

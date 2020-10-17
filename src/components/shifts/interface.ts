@@ -6,6 +6,7 @@ export interface ShiftAttr extends Model {
 	startAmount: number;
 	startTime?: string;
 	endAmount?: number;
+	cashDetails: { type: number, quantity: number }[];
 	endTime?: string;
 	date?: string;
 }
