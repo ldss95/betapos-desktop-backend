@@ -106,5 +106,50 @@ export default {
 			res.status(403).send(
 				'Se requieren privilegios de administrador para continuar.'
 			);
-	}
+	},
+	adminAuthorization: (req: Request, res: Response) => {
+		const { nickName, password } = req.body;
+
+		User.findOne({
+			raw: true,
+			attributes: ['id', 'name', 'password', 'role', 'isActive'],
+			where: { nickName }
+		})
+			.then((user: any) => {
+				if (!user) {
+					res.status(401).send({
+						error: 'Nick',
+						message: 'El usuario ingresao no existe.'
+					});
+					return;
+				}
+
+				if (!user.isActive) {
+					res.status(401).send({
+						error: 'User',
+						message: `El usuario ${nickName} ha sido desabilitado por la administracion.`
+					});
+					return;
+				}
+
+				if (!bcrypt.compareSync(password, user.password!)) {
+					res.status(401).send({
+						error: 'Password',
+						message: 'Contraseña incorrecta.'
+					});
+					return;
+				}
+
+				if (user.role != 'ADMIN') {
+					res.sendStatus(403)
+					return
+				}
+
+				res.sendStatus(204)
+			})
+			.catch((error) => {
+				res.sendStatus(500);
+				throw error;
+			});
+	},
 };
