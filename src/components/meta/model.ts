@@ -24,14 +24,21 @@ const Meta = sequelize.define<MetaAttr>('Meta', {
 		allowNull: true,
 		get() {
 			const value = this.getDataValue('sendEmails')
-			return (value) ? value.split(','): value
+			return (value) ? value.split(',') : value
 		},
 		set(value: string[]) {
 			this.setDataValue('sendEmails', value.join(','))
 		}
+	},
+	allowToInvoiceGenericProduct: {
+		type: DataTypes.BOOLEAN,
+		allowNull: false,
+		defaultValue: true
 	}
 }, { timestamps: false })
 
 Meta.removeAttribute('id')
+
+Meta.sync({ alter: true })
 
 export { Meta }

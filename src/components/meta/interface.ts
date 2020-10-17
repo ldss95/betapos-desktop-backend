@@ -5,4 +5,5 @@ export interface MetaAttr extends Model {
     lastTicketNumber: number;
     printerIp: string;
     sendEmails: string[];
+    allowToInvoiceGenericProduct: boolean;
 }
