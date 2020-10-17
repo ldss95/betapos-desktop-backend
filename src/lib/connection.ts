@@ -5,7 +5,6 @@ export const sequelize = new Sequelize({
 	dialectOptions: {
 		dateStrings: true,
 		typeCast: true,
-		useUTC: false
 	},
 	define: {
 		charset: 'utf8',
@@ -20,4 +19,4 @@ export const sequelize = new Sequelize({
 	logging: false
 });
 
-//sequelize.sync({ alter: true });
+sequelize.sync();
