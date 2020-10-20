@@ -2,6 +2,7 @@ import { DataTypes } from 'sequelize';
 
 import { sequelize } from '../../lib/connection';
 import { TicketProductAttr } from './interface';
+import { Product } from '../products/model'
 
 const TicketProduct = sequelize.define<TicketProductAttr>(
 	'TicketProduct',
@@ -33,5 +34,8 @@ const TicketProduct = sequelize.define<TicketProductAttr>(
 	},
 	{ timestamps: false }
 );
+
+TicketProduct.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+
 
 export { TicketProduct };

@@ -4,8 +4,7 @@ import { sequelize } from '../../lib/connection';
 import { TicketAttr } from './interface';
 import { User } from '../users/model';
 import { Shift } from '../shifts/model';
-import { Product } from '../products/model';
-import { TicketProduct } from '../ticket-product/model';
+import { TicketProduct } from '../ticket-products/model';
 import { Meta } from '../meta/model';
 
 const Ticket = sequelize.define<TicketAttr>(
@@ -63,7 +62,6 @@ const Ticket = sequelize.define<TicketAttr>(
 
 Ticket.belongsTo(User, { foreignKey: 'userId' });
 Ticket.belongsTo(Shift, { foreignKey: 'shiftId' });
-Ticket.hasMany(TicketProduct, { foreignKey: 'ticketId' });
-TicketProduct.belongsTo(Product, { foreignKey: 'productId' });
+Ticket.hasMany(TicketProduct, { foreignKey: 'ticketId', as: 'products' });
 
 export { Ticket };

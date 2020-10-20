@@ -1,6 +1,6 @@
 import { Model } from 'sequelize';
 
-import { TicketProductAttr } from '../ticket-product/interface';
+import { TicketProductAttr } from '../ticket-products/interface';
 
 export interface TicketAttr extends Model {
 	id?: string;
