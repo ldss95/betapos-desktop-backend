@@ -1,6 +1,6 @@
 {
   "name": "20y10-desktop-backend",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "src/server.ts",
   "scripts": {
@@ -37,8 +37,6 @@
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^11.0.0",
-    "@commitlint/config-conventional": "^11.0.0",
     "@types/bcrypt": "^3.0.0",
     "@types/cors": "^2.8.7",
     "@types/dotenv": "^8.2.0",
@@ -53,7 +51,6 @@
     "@types/sequelize": "^4.28.9",
     "@types/shortid": "0.0.29",
     "@types/socket.io": "^2.1.11",
-    "husky": "^4.3.0",
     "nodemon": "^2.0.4",
     "sequelize-cli": "^6.2.0",
     "ts-node": "^9.0.0",
