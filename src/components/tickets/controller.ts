@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import { Product } from '../products/model';
 import { Ticket } from './model';
-import { TicketProduct } from '../ticket-product/model';
+import { TicketProduct } from '../ticket-products/model';
 import { sendToAPI } from '../sync/controller'
 
 export default {
@@ -11,12 +11,8 @@ export default {
 			const { ticket, products, shop } = req.body;
 			ticket.userId = req.session!.user.id;
 
-			const results = await Ticket.create({
-				...ticket,
-				TicketProducts: products
-			}, {
-				include: [TicketProduct],
-				
+			const results = await Ticket.create({ ...ticket, products }, {
+				include: { model: TicketProduct, as: 'products' }
 			});
 
 			const savedTicket = results.get({ plain: true })
@@ -31,16 +27,16 @@ export default {
 				reTry: true,
 				attemp: 1,
 				isNew: true,
-				callback: () => {}
+				callback: () => { }
 			});
-			
+
 			res.sendStatus(201);
 		} catch (error) {
 			res.sendStatus(500);
 			throw error;
 		}
 	},
-	getOne: async (req: Request, res: Response) => {
+	getOne: (req: Request, res: Response) => {
 		const { ticketNumber } = req.params;
 
 		Ticket.findOne({
@@ -48,7 +44,8 @@ export default {
 			include: [
 				{
 					model: TicketProduct,
-					include: [Product]
+					as: 'products',
+					include: [{ model: Product, as: 'product' }]
 				}
 			]
 		})
