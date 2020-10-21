@@ -10,6 +10,7 @@ import settings from './components/settings/routes';
 import cashFlow from './components/cash-flow/routes';
 import sync from './components/sync/routes';
 import meta from './components/meta/routes';
+import creditNotes from './components/credit-notes/routes';
 
 router.use('/auth', auth);
 router.use('/products', products);
@@ -20,6 +21,7 @@ router.use('/settings', settings);
 router.use('/cash-flow', cashFlow);
 router.use('/sync', sync);
 router.use('/meta', meta);
+router.use('/credit-notes', creditNotes);
 
 router.all('*', (req: Request, res: Response) => res.sendStatus(404));
 
