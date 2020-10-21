@@ -2,13 +2,28 @@ import { Request, Response } from 'express';
 import moment from 'moment';
 
 import { Shift } from './model';
+import { sendToAPI } from '../sync/controller'
 
 export default {
 	create: (req: Request, res: Response) => {
 		const { amount } = req.body;
 
 		Shift.create({ startAmount: amount, userId: req.session!.user.id })
-			.then((results) => res.status(201).send(results))
+			.then((results) => {
+				res.status(201).send(results)
+
+				const shift = results.get({ plain: true })
+				shift.shopId = req.session!.shopId
+				sendToAPI({
+					path: '/shifts',
+					data: { shift },
+					reTry: true,
+					method: 'POST',
+					attemp: 1,
+					isNew: true,
+					callback: () => { }
+				})
+			})
 			.catch((error) => {
 				res.sendStatus(500);
 				throw error;
