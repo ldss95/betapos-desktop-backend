@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
-import { fn, col, where } from 'sequelize'
+import { fn, col } from 'sequelize'
+import moment from 'moment'
 
 import { CashFlow } from './model';
 import { Ticket } from '../tickets/model'
+import { sendToAPI } from '../sync/controller'
 
 export default {
 	create: async (req: Request, res: Response) => {
@@ -10,8 +12,26 @@ export default {
 			const { id } = req.session!.user;
 			const { amount, description, type, shiftId, cashDetail } = req.body;
 
-			const cashFlow = { userId: id, amount, description, type, shiftId, cashDetail };
-			await CashFlow.create(cashFlow)
+			const data = { userId: id, amount, description, type, shiftId, cashDetail };
+			let cashFlow: any = await CashFlow.create(data)
+
+			/*
+				Send To API
+			*/
+			cashFlow = cashFlow.get()
+			cashFlow.createdAt = moment(cashFlow.createdAt).format('YYYY-MM-DD HH:mm:ss')
+			cashFlow.updatedAt = moment(cashFlow.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+			cashFlow.shopId = req.session!.shopId
+			sendToAPI({
+				path: '/cash-flow',
+				method: 'POST',
+				data: { cashFlow },
+				isNew: true,
+				attemp: 1,
+				reTry: true,
+				callback: () => { }
+			})
+			/* */
 
 			if (type == 'CHECK') {
 				const sold: any = await Ticket.findOne({
