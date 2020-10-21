@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
 import moment from 'moment';
+import { fn, col } from 'sequelize'
 
 import { Shift } from './model';
+import { Ticket } from '../tickets/model'
+import { CashFlow } from '../cash-flow/model'
 import { sendToAPI } from '../sync/controller'
 
 export default {
@@ -78,19 +81,69 @@ export default {
 				throw error;
 			});
 	},
-	finishShift: (req: Request, res: Response) => {
-		const { id, endAmount, cashDetail } = req.body;
-		Shift.update(
-			{
-				endAmount,
+	finishShift: async (req: Request, res: Response) => {
+		try {
+			const { id, endAmount, cashDetail } = req.body;
+			const endTime = moment().format('HH:mm:ss')
+
+			await Shift.update(
+				{
+					endAmount,
+					cashDetail,
+					endTime
+				},
+				{ where: { id } }
+			)
+
+			res.sendStatus(204)
+
+			const sold: any = await Ticket.findOne({
+				where: { shiftId: id },
+				attributes: [
+					[fn('coalesce', fn('sum', col('amount')), 0), 'sold'],
+					[fn('coalesce', fn('sum', col('discount')), 0), 'discount']
+				],
+				raw: true
+			})
+
+			const _in: any = await CashFlow.findOne({
+				where: { shiftId: id, type: 'IN' },
+				attributes: [
+					[fn('coalesce', fn('sum', col('amount')), 0), 'income']
+				],
+				raw: true
+			})
+
+			const _out: any = await CashFlow.findOne({
+				where: { shiftId: id, type: 'OUT' },
+				attributes: [
+					[fn('coalesce', fn('sum', col('amount')), 0), 'expenses']
+				],
+				raw: true
+			})
+
+			const shift = {
+				id,
+				endCash: endAmount,
 				cashDetail,
-				endTime: moment().format('HH:mm:ss')
-			},
-			{ where: { id } }
-		).then(() => res.sendStatus(204))
-			.catch((error) => {
-				res.sendStatus(500);
-				throw error;
-			});
+				cashIn: _in.income,
+				cashOut: _out.expenses,
+				totalSold: sold.sold - sold.discount,
+				endTime
+			}
+
+			sendToAPI({
+				path: '/shifts',
+				method: 'PUT',
+				data: { shift },
+				attemp: 1,
+				reTry: true,
+				isNew: true,
+				callback: () => { }
+			})
+		} catch (error) {
+			res.sendStatus(500);
+			throw error;
+		}
 	}
 };
