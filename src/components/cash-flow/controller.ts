@@ -17,8 +17,8 @@ export default {
 				const sold: any = await Ticket.findOne({
 					where: { shiftId },
 					attributes: [
-						[fn('sum', col('amount')), 'sold'],
-						[fn('sum', col('discount')), 'discount']
+						[fn('coalesce', fn('sum', col('amount')), 0), 'sold'],
+						[fn('coalesce', fn('sum', col('discount')), 0), 'discount']
 					],
 					raw: true
 				})
@@ -26,7 +26,7 @@ export default {
 				const _in: any = await CashFlow.findOne({
 					where: { shiftId, type: 'IN' },
 					attributes: [
-						[fn('sum', col('amount')), 'income']
+						[fn('coalesce', fn('sum', col('amount')), 0), 'income']
 					],
 					raw: true
 				})
@@ -34,16 +34,16 @@ export default {
 				const _out: any = await CashFlow.findOne({
 					where: { shiftId, type: 'OUT' },
 					attributes: [
-						[fn('sum', col('amount')), 'expenses']
+						[fn('coalesce', fn('sum', col('amount')), 0), 'expenses']
 					],
 					raw: true
 				})
 
 				res.status(200).send({
-					sold: sold.sold || 0,
-					discount: sold.discount || 0,
-					income: _in.income || 0,
-					expenses: _out.expenses || 0,
+					sold: sold.sold,
+					discount: sold.discount,
+					income: _in.income,
+					expenses: _out.expenses,
 					amount
 				})
 				return
