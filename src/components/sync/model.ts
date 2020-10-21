@@ -19,6 +19,13 @@ const Sync = sequelize.define<SyncAttr>('Sync', {
         type: DataTypes.JSON,
         allowNull: false
     },
+    method: {
+        type: DataTypes.STRING(4),
+        allowNull: false,
+        validate: {
+            isIn: [['PUT', 'POST']]
+        }
+    },
     status: {
         type: DataTypes.STRING(7),
         defaultValue: 'PENDING',
@@ -27,5 +34,7 @@ const Sync = sequelize.define<SyncAttr>('Sync', {
         }
     }
 })
+
+Sync.sync({ alter: true })
 
 export { Sync }
