@@ -14,7 +14,8 @@ const sync = (req: Request, res: Response) => {
 					path: record.path,
 					data: record.data,
 					isNew: false,
-					reTry: (wait) ? false: true, //If client is waiting for response, no re try send to api when fail.
+					method: record.method,
+					reTry: (wait) ? false : true, //If client is waiting for response, no re try send to api when fail.
 					attemp: 1,
 					callback: (isSaved: boolean) => {
 						if (!isSaved && !responseIsSend) {
@@ -28,14 +29,14 @@ const sync = (req: Request, res: Response) => {
 								.catch(error => {
 									throw error
 								})
-							
+
 							/*
 								If the client is waiting response,
 								verify if all done, then send response.
 							*/
 							if (wait) {
 								records = records.filter(item => item.id != record.id)
-							
+
 								if (records.length == 0) {
 									res.status(200).send({ allIsDone: true })
 								}
@@ -79,25 +80,26 @@ interface SendToApiInput {
 	isNew: boolean,
 	reTry: boolean;
 	attemp: number,
+	method: 'POST' | 'PUT';
 	callback: CallableFunction
 }
 
 const sendToAPI = (input: SendToApiInput) => {
-	const { path, data, isNew, callback, reTry, attemp } = input
+	const { path, data, isNew, callback, reTry, attemp, method } = input
 
 	const hostname = (process.env.NODE_ENV == 'production')
 		? process.env.API_URL
 		: 'localhost'
-	
+
 	const port = (process.env.NODE_ENV == 'production')
 		? 80
 		: 4012
-	
+
 	const options = {
 		hostname,
 		port,
 		path,
-		method: 'POST',
+		method,
 		headers: {
 			'Content-Type': 'application/json'
 		}
@@ -105,14 +107,14 @@ const sendToAPI = (input: SendToApiInput) => {
 
 	const req = http.request(options, (res) => {
 		const { statusCode } = res
-		callback((statusCode == 201) ? true: false)
+		callback((statusCode == 201) ? true : false)
 
 		res.on('data', (d) => {
 			process.stdout.write(d);
 		});
 	});
 
-	req.on('error', (error) => {
+	req.on('error', () => {
 		if (reTry && attemp < 3) {
 			setTimeout(() => {
 				sendToAPI({
@@ -125,7 +127,7 @@ const sendToAPI = (input: SendToApiInput) => {
 		}
 
 		if (isNew) {
-			Sync.create({ path, data })
+			Sync.create({ path, data, method })
 				.catch(error => {
 					throw error
 				})
