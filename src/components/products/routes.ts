@@ -1,20 +1,20 @@
 import { Router } from 'express';
 const router: Router = Router();
 
-import auth from '../auth/controller';
+import { isLoggedIn, checkToken } from '../../middlewares/auth';
 import controller from './controller';
 
 router
 	.route('/')
-	.post(auth.isLoggedIn, auth.verifyToken, controller.create)
-	.get(auth.isLoggedIn, auth.verifyToken, controller.getAll);
+	.post(isLoggedIn, checkToken, controller.create)
+	.get(isLoggedIn, checkToken, controller.getAll);
 
 router.get(
 	'/table',
-	auth.isLoggedIn,
-	auth.verifyToken,
+	isLoggedIn,
+	checkToken,
 	controller.getAllForTable
 );
-router.get('/:id', auth.isLoggedIn, auth.verifyToken, controller.getOne);
+router.get('/:id', isLoggedIn, checkToken, controller.getOne);
 
 export default router;

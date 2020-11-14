@@ -1,15 +1,15 @@
 import { Router } from 'express';
 const router: Router = Router();
 
-import auth from '../auth/controller';
+import { isLoggedIn, checkToken } from '../../middlewares/auth';
 import controller from './controller';
 
-router.route('/').post(auth.isLoggedIn, auth.verifyToken, controller.create);
+router.route('/').post(isLoggedIn, checkToken, controller.create);
 
 router.get(
 	'/:ticketNumber',
-	auth.isLoggedIn,
-	auth.verifyToken,
+	isLoggedIn,
+	checkToken,
 	controller.getOne
 );
 

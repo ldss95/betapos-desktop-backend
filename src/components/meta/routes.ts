@@ -1,11 +1,11 @@
 import { Router } from 'express'
 const router: Router = Router()
 
-import auth from '../auth/controller'
+import { isLoggedIn, checkToken, isAdmin } from '../../middlewares/auth';
 import controller from './controller'
 
 router.route('/')
-    .get(auth.isLoggedIn, auth.verifyToken, controller.get)
-    .put(auth.isLoggedIn, auth.verifyToken, auth.isAdmin, controller.update)
+    .get(isLoggedIn, checkToken, controller.get)
+    .put(isLoggedIn, checkToken, isAdmin, controller.update)
 
 export default router
