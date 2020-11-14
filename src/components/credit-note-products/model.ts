@@ -1,10 +1,10 @@
 import { DataTypes } from 'sequelize';
 
-import { sequelize } from '../../lib/connection';
+import { db } from '../../db/connection';
 import { CreditNoteProductAttr } from './interface';
 import { Product } from '../products/model'
 
-const CreditNoteProduct = sequelize.define<CreditNoteProductAttr>(
+const CreditNoteProduct = db.define<CreditNoteProductAttr>(
 	'CreditNoteProduct',
 	{
 		id: {

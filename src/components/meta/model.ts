@@ -1,9 +1,9 @@
 import { DataTypes } from 'sequelize'
 
-import { sequelize } from '../../lib/connection'
+import { db } from '../../db/connection'
 import { MetaAttr } from './interface'
 
-const Meta = sequelize.define<MetaAttr>('Meta', {
+const Meta = db.define<MetaAttr>('Meta', {
 	shopId: {
 		type: DataTypes.TINYINT,
 		allowNull: false

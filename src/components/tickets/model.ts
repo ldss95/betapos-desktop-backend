@@ -1,13 +1,13 @@
 import { DataTypes } from 'sequelize';
 
-import { sequelize } from '../../lib/connection';
+import { db } from '../../db/connection';
 import { TicketAttr } from './interface';
 import { User } from '../users/model';
 import { Shift } from '../shifts/model';
 import { TicketProduct } from '../ticket-products/model';
 import { Meta } from '../meta/model';
 
-const Ticket = sequelize.define<TicketAttr>(
+const Ticket = db.define<TicketAttr>(
 	'Ticket',
 	{
 		id: {

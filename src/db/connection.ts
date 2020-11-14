@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 
-export const sequelize = new Sequelize({
+export const db = new Sequelize({
 	dialect: 'mysql',
 	dialectOptions: {
 		dateStrings: true,
@@ -19,4 +19,4 @@ export const sequelize = new Sequelize({
 	logging: false
 });
 
-sequelize.sync();
+db.sync();

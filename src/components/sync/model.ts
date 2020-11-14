@@ -1,9 +1,9 @@
 import { DataTypes } from 'sequelize'
 
-import { sequelize } from '../../lib/connection'
+import { db } from '../../db/connection'
 import { SyncAttr } from './interface'
 
-const Sync = sequelize.define<SyncAttr>('Sync', {
+const Sync = db.define<SyncAttr>('Sync', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
