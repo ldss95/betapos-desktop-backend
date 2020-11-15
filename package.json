@@ -19,7 +19,6 @@
   },
   "homepage": "https://github.com/ldss95/20y10-desktop-backend#readme",
   "dependencies": {
-    "@sendgrid/mail": "^7.2.5",
     "@sentry/node": "^5.23.0",
     "axios": "^0.20.0",
     "bcrypt": "^5.0.0",
@@ -28,13 +27,14 @@
     "express": "^4.17.1",
     "express-mysql-session": "^2.1.4",
     "express-session": "^1.17.1",
+    "handlebars": "^4.7.6",
     "html-pdf": "^2.2.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.27.0",
     "mysql2": "^2.2.5",
+    "nodemailer": "^6.4.16",
     "sequelize": "^6.3.5",
-    "shortid": "^2.2.15",
-    "socket.io": "^2.3.0"
+    "shortid": "^2.2.15"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
@@ -48,9 +48,9 @@
     "@types/moment": "^2.13.0",
     "@types/mysql": "^2.15.15",
     "@types/node": "^14.6.4",
+    "@types/nodemailer": "^6.4.0",
     "@types/sequelize": "^4.28.9",
     "@types/shortid": "0.0.29",
-    "@types/socket.io": "^2.1.11",
     "nodemon": "^2.0.4",
     "sequelize-cli": "^6.2.0",
     "ts-node": "^9.0.0",
