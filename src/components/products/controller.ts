@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Op, AndOperator } from 'sequelize';
 
 import { Product, Barcode } from './model';
-import { sequelize } from '../../lib/connection';
+import { db } from '../../db/connection';
 
 export default {
 	create: (req: Request, res: Response) => {},
@@ -78,7 +78,7 @@ export default {
 				b.barcode = '${id}'
 			LIMIT 1`;
 
-		sequelize
+		db
 			?.query(query, { plain: true })
 			.then((product) => res.status(200).send(product))
 			.catch((error) => {
