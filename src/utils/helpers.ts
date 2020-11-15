@@ -1,19 +1,38 @@
-import sgMail from '@sendgrid/mail';
+import nodemailer from 'nodemailer'
 
-sgMail.setApiKey(`${process.env.SENDGRID_API_KEY}`);
+const transporter = nodemailer.createTransport({
+	secure: false,
+	ignoreTLS: true,
+	tls: {
+		rejectUnauthorized: false,
+	},
+	port: 587,
+	host: 'us2.smtp.mailhostbox.com',
+	auth: {
+		user: process.env.NOTIFICATIONS_EMAIL,
+		pass: process.env.NOTIFICATIONS_PASSWORD
+	}
+})
 
 interface msgAttr {
-	from: string;
-	to: string[];
+	from?: string;
+	to: string;
 	subject: string;
 	html: string;
-	attachments?: any;
+	attachments?: {
+		filename: string;
+		path: string;
+	}[];
 }
 
 function sendMessage(msg: msgAttr) {
-	sgMail.send(msg).catch((error) => {
-		throw error.message;
-	});
+	msg.from = `ZECONOMY <${process.env.NOTIFICATIONS_EMAIL}>`
+	
+	transporter.sendMail(msg, (error) => {
+		if (error) {
+			throw error
+		}
+	})
 }
 
 const format = {
