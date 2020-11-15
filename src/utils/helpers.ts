@@ -1,4 +1,7 @@
 import nodemailer from 'nodemailer'
+import handlebars from 'handlebars'
+import htmlPdf, { CreateOptions } from 'html-pdf'
+import fs from 'fs'
 
 const transporter = nodemailer.createTransport({
 	secure: false,
@@ -23,6 +26,12 @@ interface msgAttr {
 		filename: string;
 		path: string;
 	}[];
+}
+
+interface documentAttr {
+	templatePath: string;
+	templateContext: object;
+	outputPath: string
 }
 
 function sendMessage(msg: msgAttr) {
@@ -83,4 +92,20 @@ function duiIsValid(dui: string): boolean {
 	return isValid;
 }
 
-export { duiIsValid, sendMessage, format };
+function generatePdf(document: documentAttr, options?: CreateOptions) {
+	const template = fs.readFileSync(document.templatePath, 'utf8')
+	const html = handlebars.compile(template)(document.templateContext)
+
+	return new Promise((resolve, reject) => {
+		htmlPdf.create(html, options)
+		.toFile(document.outputPath, (error, res) => {
+			if (error) {
+				reject(error)
+			} else {
+				resolve(res)
+			}
+		})
+	})
+}
+
+export { duiIsValid, sendMessage, format, generatePdf };
