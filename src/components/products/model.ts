@@ -63,6 +63,6 @@ const Barcode = db.define<BarcodeAttr>(
 	{ timestamps: false }
 );
 
-Product.hasMany(Barcode, { foreignKey: 'productId' });
+Product.hasMany(Barcode, { foreignKey: 'productId', as: 'barcodes' });
 
 export { Product, Barcode };

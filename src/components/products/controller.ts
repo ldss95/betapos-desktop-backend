@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Op, AndOperator } from 'sequelize';
+import { Op } from 'sequelize';
 
 import { Product, Barcode } from './model';
 import { db } from '../../db/connection';
@@ -10,7 +10,7 @@ export default {
 	create: (req: Request, res: Response) => {},
 	getAll: (req: Request, res: Response) => {
 		Product.findAll({
-			include: [Barcode]
+			include: { model: Barcode, as: 'barcodes' }
 		})
 			.then((products) => res.status(200).send(products))
 			.catch((error) => {
@@ -48,7 +48,7 @@ export default {
 		}
 
 		Product.findAndCountAll({
-			include: { model: Barcode },
+			include: { model: Barcode, as: 'barcodes' },
 			limit: pagination.pageSize,
 			offset: (pagination.current - 1) * pagination.pageSize,
 			where
