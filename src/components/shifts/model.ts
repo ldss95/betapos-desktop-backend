@@ -1,10 +1,10 @@
 import { DataTypes } from 'sequelize';
 
-import { sequelize } from '../../lib/connection';
+import { db } from '../../db/connection';
 import { ShiftAttr } from './interface';
 import { User } from '../users/model';
 
-const Shift = sequelize.define<ShiftAttr>(
+const Shift = db.define<ShiftAttr>(
 	'Shift',
 	{
 		id: {

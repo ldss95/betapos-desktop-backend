@@ -1,9 +1,9 @@
 import { DataTypes } from 'sequelize';
 
-import { sequelize } from '../../lib/connection';
+import { db } from '../../db/connection';
 import { ProductAttr, BarcodeAttr } from './interface';
 
-const Product = sequelize.define<ProductAttr>(
+const Product = db.define<ProductAttr>(
 	'Product',
 	{
 		id: {
@@ -40,7 +40,7 @@ const Product = sequelize.define<ProductAttr>(
 	{ timestamps: false }
 );
 
-const Barcode = sequelize.define<BarcodeAttr>(
+const Barcode = db.define<BarcodeAttr>(
 	'Barcode',
 	{
 		id: {
@@ -63,6 +63,6 @@ const Barcode = sequelize.define<BarcodeAttr>(
 	{ timestamps: false }
 );
 
-Product.hasMany(Barcode, { foreignKey: 'productId' });
+Product.hasMany(Barcode, { foreignKey: 'productId', as: 'barcodes' });
 
 export { Product, Barcode };

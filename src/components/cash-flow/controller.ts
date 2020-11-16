@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
-import { fn, col, where } from 'sequelize'
+import { fn, col } from 'sequelize'
+import moment from 'moment'
 
 import { CashFlow } from './model';
 import { Ticket } from '../tickets/model'
+import { sendToAPI } from '../sync/controller'
 
 export default {
 	create: async (req: Request, res: Response) => {
@@ -10,15 +12,33 @@ export default {
 			const { id } = req.session!.user;
 			const { amount, description, type, shiftId, cashDetail } = req.body;
 
-			const cashFlow = { userId: id, amount, description, type, shiftId, cashDetail };
-			await CashFlow.create(cashFlow)
+			const data = { userId: id, amount, description, type, shiftId, cashDetail };
+			let cashFlow: any = await CashFlow.create(data)
+
+			/*
+				Send To API
+			*/
+			cashFlow = cashFlow.get()
+			cashFlow.createdAt = moment(cashFlow.createdAt).format('YYYY-MM-DD HH:mm:ss')
+			cashFlow.updatedAt = moment(cashFlow.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+			cashFlow.shopId = req.session!.shopId
+			sendToAPI({
+				path: '/cash-flow',
+				method: 'POST',
+				data: { cashFlow },
+				isNew: true,
+				attemp: 1,
+				reTry: true,
+				callback: () => { }
+			})
+			/* */
 
 			if (type == 'CHECK') {
 				const sold: any = await Ticket.findOne({
 					where: { shiftId },
 					attributes: [
-						[fn('sum', col('amount')), 'sold'],
-						[fn('sum', col('discount')), 'discount']
+						[fn('coalesce', fn('sum', col('amount')), 0), 'sold'],
+						[fn('coalesce', fn('sum', col('discount')), 0), 'discount']
 					],
 					raw: true
 				})
@@ -26,7 +46,7 @@ export default {
 				const _in: any = await CashFlow.findOne({
 					where: { shiftId, type: 'IN' },
 					attributes: [
-						[fn('sum', col('amount')), 'income']
+						[fn('coalesce', fn('sum', col('amount')), 0), 'income']
 					],
 					raw: true
 				})
@@ -34,16 +54,16 @@ export default {
 				const _out: any = await CashFlow.findOne({
 					where: { shiftId, type: 'OUT' },
 					attributes: [
-						[fn('sum', col('amount')), 'expenses']
+						[fn('coalesce', fn('sum', col('amount')), 0), 'expenses']
 					],
 					raw: true
 				})
 
 				res.status(200).send({
-					sold: sold.sold || 0,
-					discount: sold.discount || 0,
-					income: _in.income || 0,
-					expenses: _out.expenses || 0,
+					sold: sold.sold,
+					discount: sold.discount,
+					income: _in.income,
+					expenses: _out.expenses,
 					amount
 				})
 				return

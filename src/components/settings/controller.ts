@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import axios from 'axios';
 
-import { sequelize } from '../../lib/connection';
+import { db } from '../../db/connection';
 import { Product } from '../products/model';
 import { Barcode } from '../products/model';
 import { User } from '../users/model';
@@ -20,9 +20,9 @@ export default {
 			res.flushHeaders();
 
 			res.write('data: Limpiando base de datos\n\n');
-			await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
-			await sequelize.sync({ force: true, alter: true });
-			await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+			await db.query('SET FOREIGN_KEY_CHECKS = 0');
+			await db.sync({ force: true, alter: true });
+			await db.query('SET FOREIGN_KEY_CHECKS = 1');
 
 			res.write('data: Descargando lista de productos\n\n');
 			const productsRes = await axios.get(

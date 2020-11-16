@@ -23,8 +23,10 @@ export default {
 			savedTicket.shopId = shop.id
 
 			sendToAPI({
-				path: '/tickets', data: { ticket: savedTicket },
+				path: '/tickets',
+				data: { ticket: savedTicket },
 				reTry: true,
+				method: 'POST',
 				attemp: 1,
 				isNew: true,
 				callback: () => { }
