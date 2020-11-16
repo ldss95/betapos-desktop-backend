@@ -3,6 +3,8 @@ import { Op, AndOperator } from 'sequelize';
 
 import { Product, Barcode } from './model';
 import { db } from '../../db/connection';
+import { listen } from './updates_listener'
+listen()
 
 export default {
 	create: (req: Request, res: Response) => {},
