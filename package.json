@@ -27,6 +27,7 @@
     "express": "^4.17.1",
     "express-mysql-session": "^2.1.4",
     "express-session": "^1.17.1",
+    "firebase": "^8.0.2",
     "handlebars": "^4.7.6",
     "html-pdf": "^2.2.0",
     "jsonwebtoken": "^8.5.1",
