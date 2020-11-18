@@ -48,6 +48,4 @@ CreditNote.belongsTo(User, { foreignKey: 'userId' })
 CreditNote.belongsTo(Ticket, { foreignKey: 'ticketId' })
 CreditNote.hasMany(CreditNoteProduct, { foreignKey: 'creditNoteId', as: 'products' })
 
-CreditNote.sync({ alter: true })
-
 export { CreditNote };

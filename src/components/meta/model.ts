@@ -39,6 +39,4 @@ const Meta = db.define<MetaAttr>('Meta', {
 
 Meta.removeAttribute('id')
 
-Meta.sync({ alter: true })
-
 export { Meta }
