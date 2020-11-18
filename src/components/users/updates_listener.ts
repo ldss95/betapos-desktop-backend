@@ -5,25 +5,27 @@ import { User } from '../users/model'
 async function listen() {
 	const meta = await Meta.findOne({ attributes: ['shopId'] })
 
-	firebaseConnection
-		.collection('updates')
-		.where('shopId', '==', meta!.shopId)
-		.where('table', '==', 'users')
-		.onSnapshot(snap => {
-			snap.docs.forEach(async doc => {
-				const { data, type } = doc.data()
+	if (meta) {
+		firebaseConnection
+			.collection('updates')
+			.where('shopId', '==', meta!.shopId)
+			.where('table', '==', 'users')
+			.onSnapshot(snap => {
+				snap.docs.forEach(async doc => {
+					const { data, type } = doc.data()
 
-				if (type == 'create') {
-					await User.create(data)
-				} else if (type == 'update'){
-					await User.update(data, { where: { id: data.id } })
-				}
+					if (type == 'create') {
+						await User.create(data)
+					} else if (type == 'update') {
+						await User.update(data, { where: { id: data.id } })
+					}
 
-				firebaseConnection.collection('updates').doc(doc.id).delete()
+					firebaseConnection.collection('updates').doc(doc.id).delete()
+				})
+			}, error => {
+				throw error
 			})
-		}, error => {
-			throw error
-		})
+	}
 }
 
 export { listen }
