@@ -52,6 +52,7 @@ const sync = (req: Request, res: Response) => {
 			*/
 			if (!wait) {
 				res.sendStatus(202)
+				responseIsSend = true
 			}
 		}).catch(error => {
 			res.sendStatus(500)
@@ -107,7 +108,7 @@ const sendToAPI = (input: SendToApiInput) => {
 
 	const req = http.request(options, (res) => {
 		const { statusCode } = res
-		callback((statusCode == 201) ? true : false)
+		callback((statusCode == 201 || 204) ? true : false)
 
 		res.on('data', (d) => {
 			process.stdout.write(d);
