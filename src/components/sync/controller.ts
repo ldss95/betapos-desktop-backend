@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import http from 'http';
+import https from 'https';
 
 import { Sync } from './model'
 
@@ -86,15 +87,26 @@ interface SendToApiInput {
 }
 
 const sendToAPI = (input: SendToApiInput) => {
+	const API_URL = process.env.API_URL
+	const isProduction = (process.env.NODE_ENV == 'production')
+
 	const { path, data, isNew, callback, reTry, attemp, method } = input
 
-	const hostname = (process.env.NODE_ENV == 'production')
-		? process.env.API_URL
-		: 'localhost'
-
-	const port = (process.env.NODE_ENV == 'production')
-		? 80
-		: 4012
+	/**
+		Determine which client to use, depending on whether we are in production or not. While in a development environment http will be used, in production https will be used
+	*/
+	const client = (isProduction) ? https : http;
+	
+	//Get hostname, remove protocol and separate port from hostname
+	let hostname = API_URL!.replace('https://', '').replace('http://', '')
+	let port: number;
+	if (hostname.includes(':')) {
+		const portIndicatorIndex = hostname.indexOf(':')
+		port = Number(hostname.substr(portIndicatorIndex + 1))
+		hostname = hostname.substr(0, portIndicatorIndex)
+	} else {
+		port = (isProduction) ? 443: 80
+	}
 
 	const options = {
 		hostname,
@@ -106,7 +118,7 @@ const sendToAPI = (input: SendToApiInput) => {
 		}
 	};
 
-	const req = http.request(options, (res) => {
+	const req = client.request(options, (res) => {
 		const { statusCode } = res
 		callback((statusCode == 201 || 204) ? true : false)
 
