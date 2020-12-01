@@ -28,10 +28,6 @@ const Product = db.define<ProductAttr>(
 				isUrl: true
 			}
 		},
-		stock: {
-			type: DataTypes.SMALLINT,
-			allowNull: false
-		},
 		price: {
 			type: DataTypes.FLOAT,
 			allowNull: false
