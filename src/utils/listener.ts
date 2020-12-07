@@ -1,6 +1,6 @@
 import { UniqueConstraintError, ForeignKeyConstraintError } from 'sequelize'
 
-import { firebaseConnection } from '../../../API/src/db/firebase'
+import { firebaseConnection } from '../db/firebase'
 import { Meta } from '../components/meta/model'
 import { Product, Barcode } from '../components/products/model'
 import { User } from '../components/users/model'
