@@ -6,6 +6,7 @@ const Sentry = require('@sentry/node');
 import cors from 'cors';
 import 'dotenv/config';
 
+import { listen } from './utils/listener'
 import routes from './routes';
 const app: Express = express();
 
@@ -63,6 +64,9 @@ app.use(
 		}
 	})
 );
+
+//Listen updates from firebase
+listen()
 
 //Routes
 app.use(routes);

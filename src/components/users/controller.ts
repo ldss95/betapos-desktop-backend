@@ -3,9 +3,6 @@ import bcrypt from 'bcrypt';
 import { ValidationError } from 'sequelize';
 
 import { User } from './model';
-import { listen } from './updates_listener'
-
-listen()
 
 export default {
 	update: (req: Request, res: Response) => {
