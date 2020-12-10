@@ -62,7 +62,7 @@ export default {
 				throw error;
 			});
 	},
-	getOne: (req: Request, res: Response) => {
+	find: (req: Request, res: Response) => {
 		const { id } = req.params;
 
 		const query = `SELECT
@@ -75,12 +75,11 @@ export default {
 			WHERE
 				p.id = '${id}' OR
 				p.reference = '${id}' OR 
-				b.barcode = '${id}'
-			LIMIT 1`;
+				b.barcode = '${id}'`;
 
 		db
-			?.query(query, { plain: true })
-			.then((product) => res.status(200).send(product))
+			?.query(query, { type: 'SELECT' })
+			.then((products) => res.status(200).send(products))
 			.catch((error) => {
 				res.sendStatus(500);
 				throw error;

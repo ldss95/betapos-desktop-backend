@@ -15,6 +15,7 @@ router.get(
 	checkToken,
 	controller.getAllForTable
 );
-router.get('/:id', isLoggedIn, checkToken, controller.getOne);
+
+router.get('/find/:id', isLoggedIn, checkToken, controller.find);
 
 export default router;
