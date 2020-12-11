@@ -73,7 +73,7 @@ export default {
 			INNER JOIN
 				Barcodes b ON b.productId = p.id
 			WHERE
-				p.id = '${id}' OR
+				(p.id = '${id}' AND '${id}' REGEXP '^[0-9]+$') OR
 				p.reference = '${id}' OR 
 				b.barcode = '${id}'`;
 
