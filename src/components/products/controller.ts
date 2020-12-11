@@ -75,7 +75,8 @@ export default {
 			WHERE
 				(p.id = '${id}' AND '${id}' REGEXP '^[0-9]+$') OR
 				p.reference = '${id}' OR 
-				b.barcode = '${id}'`;
+				b.barcode = '${id}'
+			GROUP BY p.id`;
 
 		db
 			?.query(query, { type: 'SELECT' })
