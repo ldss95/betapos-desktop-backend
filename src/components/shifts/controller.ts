@@ -10,7 +10,8 @@ import { Ticket } from '../tickets/model'
 import { CashFlow } from '../cash-flow/model'
 import { Meta } from '../meta/model'
 import { sendToAPI } from '../sync/controller'
-import { sendMessage, format, generatePdf } from '../../utils/helpers';
+import { sendMessage } from '../../utils/helpers';
+import { format, pdf } from '@ldss95/helpers'
 
 moment.locale('es')
 

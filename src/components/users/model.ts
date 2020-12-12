@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 
 import { db } from '../../db/connection';
 import { UserAttr } from './interface';
-import { duiIsValid } from '../../utils/helpers';
+import { duiIsValid } from '@ldss95/helpers';
 
 const User = db.define<UserAttr>('User', {
 	id: {
