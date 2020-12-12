@@ -4,16 +4,17 @@ import 'moment/locale/es'
 import { fn, col } from 'sequelize'
 import path from 'path'
 import sid from 'shortid'
+import axios from 'axios'
 
 import { Shift } from './model';
 import { Ticket } from '../tickets/model'
 import { CashFlow } from '../cash-flow/model'
-import { Meta } from '../meta/model'
 import { sendToAPI } from '../sync/controller'
 import { sendMessage } from '../../utils/helpers';
 import { format, pdf } from '@ldss95/helpers'
 
 moment.locale('es')
+const API_URL = process.env.API_URL;
 
 export default {
 	create: (req: Request, res: Response) => {
@@ -186,13 +187,13 @@ export default {
 				}
 			})
 
-			const meta = await Meta.findOne({ attributes: ['sendEmails'] })
+			const { data } = await axios.get(API_URL + '/settings')
 
 			sendMessage({
 				html: '',
-				to: meta!.sendEmails.join(','),
-				subject: `${shopName} ${moment().format('DD / MMMM / YYYY')}`,
-				attachments: [{
+					to: data.sendEmails.join(','),
+					subject: `${shopName} ${moment().format('DD / MMMM / YYYY')}`,
+					attachments: [{
 					filename: fileName,
 					path: filePath
 				}]
