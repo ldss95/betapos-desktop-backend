@@ -149,14 +149,15 @@ export default {
 				Send Email with pdf
 			*/
 			
-			const fileName = `Cierre ${shopName} ${sid.generate()}.pdf`
-			const filePath = path.join(__dirname, `../../reports/${fileName}`)
+			const filename = `Cierre ${shopName} ${sid.generate()}.pdf`
+			const filePath = path.join(__dirname, `../../reports/`)
 			const mismatch = endAmount - (sold.sold - sold.discount + shift.startAmount + incomeAmount- expensesAmount)
 
-			await generatePdf({
+			await pdf.toFile({
 				templatePath: path.join(__dirname, '../../templates/shift_end.hbs'),
-				outputPath: filePath,
-				templateContext: {
+				filename,
+				outDir: filePath,
+				context: {
 					shopName,
 					date: moment().format('dddd DD MMMM YYYY'),
 					sellerName,
@@ -191,15 +192,17 @@ export default {
 
 			const { data } = await axios.get(API_URL + '/settings')
 
-			sendMessage({
-				html: '',
+			if (data.sendEmails) {
+				sendMessage({
+					html: '',
 					to: data.sendEmails.join(','),
 					subject: `${shopName} ${moment().format('DD / MMMM / YYYY')}`,
 					attachments: [{
-					filename: fileName,
-					path: filePath
-				}]
-			})
+						filename,
+						path: filePath
+					}]
+				})
+			}
 		} catch (error) {
 			if (!resWasSended) {
 				res.sendStatus(500);
