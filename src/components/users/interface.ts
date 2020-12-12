@@ -9,5 +9,7 @@ export interface UserAttr extends Model {
 	phone: string;
 	birthday: string;
 	role: string;
+	tfa: boolean;
+	tfaCode: string;
 	isActive: boolean;
 }

@@ -49,6 +49,15 @@ const User = db.define<UserAttr>('User', {
 			isIn: [['ADMIN', 'SELLER']]
 		}
 	},
+	tfa: {
+		type: DataTypes.BOOLEAN,
+		allowNull: false,
+		defaultValue: 0
+	},
+	tfaCode: {
+		type: DataTypes.STRING,
+		allowNull: true
+	},
 	isActive: {
 		type: DataTypes.BOOLEAN,
 		defaultValue: true,

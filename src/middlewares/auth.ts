@@ -18,7 +18,7 @@ function checkToken(req: Request, res: Response, next: NextFunction){
 }
 
 function isLoggedIn(req: Request, res: Response, next: NextFunction){
-	if (!req.session!.user) {
+	if (!req.session!.isLoggedIn) {
 		res.status(401).send('Ninguna sesion iniciada');
 		return;
 	}

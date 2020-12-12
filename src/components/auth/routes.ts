@@ -7,6 +7,7 @@ import { isLoggedIn, checkToken } from '../../middlewares/auth'
 router.post('/login', controller.login)
 router.post('/authorize', isLoggedIn, checkToken, controller.adminAuthorization)
 router.post('/logout', isLoggedIn, checkToken, controller.logout)
+router.post('/2FA', controller.tfaAuthetication)
 router.get('/is-logged-in', isLoggedIn, (req, res) => res.sendStatus(200))
 
 export default router
