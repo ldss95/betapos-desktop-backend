@@ -91,6 +91,7 @@ export default {
 			});
 	},
 	finishShift: async (req: Request, res: Response) => {
+		let resWasSended = false
 		try {
 			const { shift, endAmount, cashDetail, shopName, sellerName } = req.body;
 			const todayDate = moment().format('YYYY-MM-DD')
@@ -106,6 +107,7 @@ export default {
 			)
 
 			res.sendStatus(204)
+			resWasSended = true
 
 			/**
 				Get Shift data
@@ -199,7 +201,9 @@ export default {
 				}]
 			})
 		} catch (error) {
-			res.sendStatus(500);
+			if (!resWasSended) {
+				res.sendStatus(500);
+			}
 			throw error;
 		}
 	}
