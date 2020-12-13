@@ -5,6 +5,8 @@ import { Meta } from '../components/meta/model'
 import { Product, Barcode } from '../components/products/model'
 import { User } from '../components/users/model'
 
+let unsubscribe: any = null
+
 async function listen() {
 	const meta = await Meta.findOne({ attributes: ['shopId'] })
 	if (meta) {
@@ -22,7 +24,10 @@ async function listen() {
 			throw new Error(errors.join("\n\n"))
 		}
 
-		firebaseConnection
+		if (unsubscribe)
+			unsubscribe()
+		
+		unsubscribe = firebaseConnection
 			.collection('updates')
 			.where('shopId', '==', meta!.shopId)
 			.onSnapshot(snap => {

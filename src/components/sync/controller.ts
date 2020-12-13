@@ -1,10 +1,12 @@
 import { Request, Response } from 'express'
+
 import http from 'http';
 import https from 'https';
-
 import { Sync } from './model'
+import { listen } from '../../utils/listener'
 
 const sync = (req: Request, res: Response) => {
+	listen()
 	const { wait } = req.body
 	let responseIsSend = false
 
