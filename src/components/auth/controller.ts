@@ -29,7 +29,7 @@ export default {
 			const user = results.get({ plain: true })
 			if (!user.isActive) {
 				res.status(401).send({
-					error: 'User',
+					error: 'Nick',
 					message: `El usuario ${nickName} ha sido desabilitado por la administracion.`
 				});
 				return;
@@ -90,11 +90,11 @@ export default {
 		});
 	},
 	adminAuthorization: (req: Request, res: Response) => {
-		const { nickName, password } = req.body;
+		const { nickName, password, token } = req.body;
 
 		User.findOne({
 			raw: true,
-			attributes: ['id', 'name', 'password', 'role', 'isActive'],
+			attributes: ['id', 'name', 'password', 'role', 'isActive', 'tfa', 'tfaCode'],
 			where: { nickName }
 		})
 			.then((user: any) => {
@@ -108,7 +108,7 @@ export default {
 
 				if (!user.isActive) {
 					res.status(401).send({
-						error: 'User',
+						error: 'Nick',
 						message: `El usuario ${nickName} ha sido desabilitado por la administracion.`
 					});
 					return;
@@ -123,7 +123,20 @@ export default {
 				}
 
 				if (user.role != 'ADMIN') {
-					res.sendStatus(403)
+					return res.sendStatus(403)
+				}
+
+				const tokenIsValid = speakeasy.totp.verify({
+					secret: user.tfaCode,
+					encoding: 'base32',
+					token
+				})
+
+				if (!tokenIsValid) {
+					res.status(401).send({
+						error: 'Token',
+						message: 'Token Invalido.'
+					})
 					return
 				}
 
