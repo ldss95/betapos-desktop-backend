@@ -23,6 +23,7 @@
     "@ldss95/helpers": "^0.1.1",
     "@sentry/node": "^5.23.0",
     "@types/speakeasy": "^2.0.5",
+    "aws-sdk": "^2.811.0",
     "axios": "^0.20.0",
     "bcrypt": "^5.0.0",
     "cors": "^2.8.5",
