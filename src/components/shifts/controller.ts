@@ -10,7 +10,7 @@ import { Shift } from './model';
 import { Ticket } from '../tickets/model'
 import { CashFlow } from '../cash-flow/model'
 import { sendToAPI } from '../sync/controller'
-import { sendMessage } from '../../utils/helpers';
+import { sendMessage, uploadFile } from '../../utils/helpers';
 import { format, pdf } from '@ldss95/helpers'
 
 moment.locale('es')
@@ -150,14 +150,11 @@ export default {
 			*/
 			
 			const filename = `Cierre ${shopName} ${sid.generate()}.pdf`
-			const filePath = path.join(__dirname, `../../reports/`)
 			const mismatch = endAmount - (sold.sold - sold.discount + shift.startAmount + incomeAmount- expensesAmount)
 
-			await pdf.toFile({
-				templatePath: path.join(__dirname, '../../templates/shift_end.hbs'),
-				filename,
-				outDir: filePath,
-				context: {
+			const stream = await pdf.toStream(
+				path.join(__dirname, '../../templates/shift_end.hbs'),
+				{
 					shopName,
 					date: moment().format('dddd DD MMMM YYYY'),
 					sellerName,
@@ -188,7 +185,9 @@ export default {
 						}
 					}
 				}
-			})
+			)
+
+			const url = await uploadFile('shifts/', filename, stream, 'application/pdf')
 
 			const { data } = await axios.get(API_URL + '/settings')
 
@@ -198,8 +197,8 @@ export default {
 					to: data.sendEmails.join(','),
 					subject: `${shopName} ${moment().format('DD / MMMM / YYYY')}`,
 					attachments: [{
-						filename,
-						path: filePath
+						href: url,
+						filename
 					}]
 				})
 			}
