@@ -114,7 +114,7 @@ export default {
 					return;
 				}
 
-				if (!bcrypt.compareSync(password, user.password!)) {
+				if (password && !bcrypt.compareSync(password, user.password!)) {
 					res.status(401).send({
 						error: 'Password',
 						message: 'Contraseña incorrecta.'
