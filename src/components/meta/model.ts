@@ -34,6 +34,10 @@ const Meta = db.define<MetaAttr>('Meta', {
 		type: DataTypes.BOOLEAN,
 		allowNull: false,
 		defaultValue: true
+	},
+	lastUpdate: {
+		type: DataTypes.DATE,
+		allowNull: true
 	}
 }, { timestamps: false })
 
