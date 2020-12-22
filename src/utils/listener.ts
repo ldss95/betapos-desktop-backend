@@ -1,4 +1,5 @@
 import { UniqueConstraintError, ForeignKeyConstraintError } from 'sequelize'
+import moment from 'moment'
 
 import { firebaseConnection } from '../db/firebase'
 import { Meta } from '../components/meta/model'
@@ -66,6 +67,8 @@ async function listen() {
 							}
 	
 							deleteDoc(doc.id)
+							const now = moment().format('YYYY-MM-DD HH:mm:ss')
+							await Meta.update({ lastUpdate: now }, { where: {} })
 						} catch (error) {
 							if (error instanceof UniqueConstraintError) {
 								deleteDoc(doc.id)
