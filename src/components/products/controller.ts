@@ -73,13 +73,13 @@ export default {
 			INNER JOIN
 				Barcodes b ON b.productId = p.id
 			WHERE
-				(p.id = '${id}' AND '${id}' REGEXP '^[0-9]+$') OR
-				p.reference = '${id}' OR 
-				b.barcode = '${id}'
+				(p.id = ? AND ? REGEXP '^[0-9]+$') OR
+				p.reference = ? OR 
+				b.barcode = ?
 			GROUP BY p.id`;
 
 		db
-			?.query(query, { type: 'SELECT' })
+			?.query(query, { type: 'SELECT', replacements: [ id, id, id, id ] })
 			.then((products) => res.status(200).send(products))
 			.catch((error) => {
 				res.sendStatus(500);
