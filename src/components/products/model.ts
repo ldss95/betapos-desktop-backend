@@ -52,8 +52,7 @@ const Barcode = db.define<BarcodeAttr>(
 		},
 		barcode: {
 			type: DataTypes.STRING(30),
-			allowNull: false,
-			unique: true
+			allowNull: false
 		}
 	},
 	{ timestamps: false }
