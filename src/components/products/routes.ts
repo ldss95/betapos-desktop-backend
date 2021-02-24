@@ -17,5 +17,6 @@ router.get(
 );
 
 router.get('/find/:id', isLoggedIn, checkToken, controller.find);
+router.put('/:id', isLoggedIn, checkToken, controller.update);
 
 export default router;

@@ -85,5 +85,14 @@ export default {
 				res.sendStatus(500);
 				throw error;
 			});
+	},
+	update: (req: Request, res: Response) => {
+		const { id } = req.params
+		Product.update(req.body, { where: { id } })
+			.then(() => res.sendStatus(204))
+			.catch(error => {
+				res.sendStatus(500)
+				throw error
+			})
 	}
 };
