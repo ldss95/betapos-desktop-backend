@@ -3,16 +3,11 @@ import { ReadStream } from 'fs'
 import aws from 'aws-sdk'
 
 const transporter = nodemailer.createTransport({
-	secure: false,
-	ignoreTLS: true,
-	tls: {
-		rejectUnauthorized: false,
-	},
-	port: 587,
-	host: 'us2.smtp.mailhostbox.com',
+	port: 25,
+	host: process.env.SMTP_SERVER,
 	auth: {
-		user: process.env.NOTIFICATIONS_EMAIL,
-		pass: process.env.NOTIFICATIONS_PASSWORD
+		user: process.env.SMTP_USER,
+		pass: process.env.SMTP_PASSWORD
 	}
 })
 
