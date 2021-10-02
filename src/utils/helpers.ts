@@ -3,7 +3,8 @@ import { ReadStream } from 'fs'
 import aws from 'aws-sdk'
 
 const transporter = nodemailer.createTransport({
-	port: 25,
+	port: 465,
+	secure: true,
 	host: process.env.SMTP_SERVER,
 	auth: {
 		user: process.env.SMTP_USER,
