@@ -11,9 +11,9 @@ declare namespace NodeJS {
 		SECRET_TOKEN: string;
 		CLIENT_URL: string;
 		API_URL: string;
-		EMAIL_SMTP: string;
-		EMAIL_PORT: number;
-		EMAIL_ACOUNT: string;
-		EMAIL_PASS: string;
+		SMTP_SERVER: string;
+		SMTP_USERNAME: string;
+		SMTP_PASSWORD: string;
+		NOTIFICATIONS_EMAIL: string;
 	}
 }

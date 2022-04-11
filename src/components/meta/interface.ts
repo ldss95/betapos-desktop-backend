@@ -6,4 +6,5 @@ export interface MetaAttr extends Model {
     printerIp: string;
     sendEmails: string[];
     allowToInvoiceGenericProduct: boolean;
+    lastUpdate: string;
 }

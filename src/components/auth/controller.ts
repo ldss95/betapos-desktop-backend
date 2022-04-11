@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import speakeasy from 'speakeasy'
 
 import { User } from '../users/model';
 import { Meta } from '../meta/model'
@@ -10,23 +11,25 @@ export default {
 		try {
 			const { nickName, password } = req.body;
 
-			const user: any = await User.findOne({
-				raw: true,
-				attributes: ['id', 'name', 'password', 'role', 'isActive'],
+			const results = await User.findOne({
+				attributes: ['id', 'name', 'password', 'role', 'isActive', 'tfa', 'tfaCode'],
 				where: { nickName }
 			})
 
-			if (!user) {
+			
+			if (!results) {
 				res.status(401).send({
 					error: 'Nick',
 					message: 'El usuario ingresao no existe.'
 				});
 				return;
 			}
-
+			
+			
+			const user = results.get({ plain: true })
 			if (!user.isActive) {
 				res.status(401).send({
-					error: 'User',
+					error: 'Nick',
 					message: `El usuario ${nickName} ha sido desabilitado por la administracion.`
 				});
 				return;
@@ -39,7 +42,6 @@ export default {
 				});
 				return;
 			}
-
 
 			delete user.password;
 
@@ -54,12 +56,16 @@ export default {
 				expiresIn: '24h'
 			});
 
-			req.session!.user = { ...user, token };
+			const isLoggedIn = !user.tfa
+			req.session!.isLoggedIn = isLoggedIn
+			req.session!.user = { ...user, token }
+
 			const meta = await Meta.findOne()
 			req.session!.shopId = meta?.shopId
 
 			res.status(200).send({
-				isLoggedIn: true,
+				isLoggedIn,
+				tfa: user.tfa,
 				token: token,
 				nickName,
 				name: user.name,
@@ -84,11 +90,11 @@ export default {
 		});
 	},
 	adminAuthorization: (req: Request, res: Response) => {
-		const { nickName, password } = req.body;
+		const { nickName, password, token } = req.body;
 
 		User.findOne({
 			raw: true,
-			attributes: ['id', 'name', 'password', 'role', 'isActive'],
+			attributes: ['id', 'name', 'password', 'role', 'isActive', 'tfa', 'tfaCode'],
 			where: { nickName }
 		})
 			.then((user: any) => {
@@ -102,13 +108,13 @@ export default {
 
 				if (!user.isActive) {
 					res.status(401).send({
-						error: 'User',
+						error: 'Nick',
 						message: `El usuario ${nickName} ha sido desabilitado por la administracion.`
 					});
 					return;
 				}
 
-				if (!bcrypt.compareSync(password, user.password!)) {
+				if (password && !bcrypt.compareSync(password, user.password!)) {
 					res.status(401).send({
 						error: 'Password',
 						message: 'Contraseña incorrecta.'
@@ -117,7 +123,20 @@ export default {
 				}
 
 				if (user.role != 'ADMIN') {
-					res.sendStatus(403)
+					return res.sendStatus(403)
+				}
+
+				const tokenIsValid = speakeasy.totp.verify({
+					secret: user.tfaCode,
+					encoding: 'base32',
+					token
+				})
+
+				if (!tokenIsValid) {
+					res.status(401).send({
+						error: 'Token',
+						message: 'Token Invalido.'
+					})
 					return
 				}
 
@@ -127,5 +146,18 @@ export default {
 				res.sendStatus(500);
 				throw error;
 			});
+	},
+	tfaAuthetication: (req: Request, res: Response) => {
+		const { token } = req.body
+		const isValid = speakeasy.totp.verify({
+			secret: req.session!.user.tfaCode,
+			encoding: 'base32',
+			token
+		})
+
+		if (isValid)
+			req.session!.isLoggedIn = true
+		
+		res.status(200).send({ isValid })
 	}
 };

@@ -35,6 +35,4 @@ const Sync = db.define<SyncAttr>('Sync', {
     }
 })
 
-Sync.sync({ alter: true })
-
 export { Sync }

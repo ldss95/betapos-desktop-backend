@@ -1,12 +1,13 @@
 {
   "name": "20y10-desktop-backend",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "",
   "main": "src/server.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy-templates",
     "start": "node dist/server.js",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "copy-templates": "cp -r src/templates dist/"
   },
   "repository": {
     "type": "git",
@@ -19,7 +20,10 @@
   },
   "homepage": "https://github.com/ldss95/20y10-desktop-backend#readme",
   "dependencies": {
+    "@ldss95/helpers": "^0.1.1",
     "@sentry/node": "^5.23.0",
+    "@types/speakeasy": "^2.0.5",
+    "aws-sdk": "^2.811.0",
     "axios": "^0.20.0",
     "bcrypt": "^5.0.0",
     "cors": "^2.8.5",
@@ -35,7 +39,8 @@
     "mysql2": "^2.2.5",
     "nodemailer": "^6.4.16",
     "sequelize": "^6.3.5",
-    "shortid": "^2.2.15"
+    "shortid": "^2.2.15",
+    "speakeasy": "^2.0.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",

@@ -3,8 +3,6 @@ import { Op } from 'sequelize';
 
 import { Product, Barcode } from './model';
 import { db } from '../../db/connection';
-import { listen } from './updates_listener'
-listen()
 
 export default {
 	create: (req: Request, res: Response) => {},
@@ -64,7 +62,7 @@ export default {
 				throw error;
 			});
 	},
-	getOne: (req: Request, res: Response) => {
+	find: (req: Request, res: Response) => {
 		const { id } = req.params;
 
 		const query = `SELECT
@@ -75,17 +73,26 @@ export default {
 			INNER JOIN
 				Barcodes b ON b.productId = p.id
 			WHERE
-				p.id = '${id}' OR
-				p.reference = '${id}' OR 
-				b.barcode = '${id}'
-			LIMIT 1`;
+				(p.id = ? AND ? REGEXP '^[0-9]+$') OR
+				p.reference = ? OR 
+				b.barcode = ?
+			GROUP BY p.id`;
 
 		db
-			?.query(query, { plain: true })
-			.then((product) => res.status(200).send(product))
+			?.query(query, { type: 'SELECT', replacements: [ id, id, id, id ] })
+			.then((products) => res.status(200).send(products))
 			.catch((error) => {
 				res.sendStatus(500);
 				throw error;
 			});
+	},
+	update: (req: Request, res: Response) => {
+		const { id } = req.params
+		Product.update(req.body, { where: { id } })
+			.then(() => res.sendStatus(204))
+			.catch(error => {
+				res.sendStatus(500)
+				throw error
+			})
 	}
 };

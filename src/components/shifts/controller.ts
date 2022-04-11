@@ -4,15 +4,17 @@ import 'moment/locale/es'
 import { fn, col } from 'sequelize'
 import path from 'path'
 import sid from 'shortid'
+import axios from 'axios'
 
 import { Shift } from './model';
 import { Ticket } from '../tickets/model'
 import { CashFlow } from '../cash-flow/model'
-import { Meta } from '../meta/model'
 import { sendToAPI } from '../sync/controller'
-import { sendMessage, format, generatePdf } from '../../utils/helpers';
+import { sendMessage, uploadFile } from '../../utils/helpers';
+import { format, pdf } from '@ldss95/helpers'
 
 moment.locale('es')
+const API_URL = process.env.API_URL;
 
 export default {
 	create: (req: Request, res: Response) => {
@@ -89,6 +91,7 @@ export default {
 			});
 	},
 	finishShift: async (req: Request, res: Response) => {
+		let resWasSended = false
 		try {
 			const { shift, endAmount, cashDetail, shopName, sellerName } = req.body;
 			const todayDate = moment().format('YYYY-MM-DD')
@@ -104,6 +107,7 @@ export default {
 			)
 
 			res.sendStatus(204)
+			resWasSended = true
 
 			/**
 				Get Shift data
@@ -145,14 +149,12 @@ export default {
 				Send Email with pdf
 			*/
 			
-			const fileName = `Cierre ${shopName} ${sid.generate()}.pdf`
-			const filePath = path.join(__dirname, `../../reports/${fileName}`)
+			const filename = `Cierre ${shopName} ${sid.generate()}.pdf`
 			const mismatch = endAmount - (sold.sold - sold.discount + shift.startAmount + incomeAmount- expensesAmount)
 
-			await generatePdf({
-				templatePath: path.join(__dirname, '../../templates/shift_end.hbs'),
-				outputPath: filePath,
-				templateContext: {
+			const stream = await pdf.toStream(
+				path.join(__dirname, '../../templates/shift_end.hbs'),
+				{
 					shopName,
 					date: moment().format('dddd DD MMMM YYYY'),
 					sellerName,
@@ -183,21 +185,27 @@ export default {
 						}
 					}
 				}
-			})
+			)
 
-			const meta = await Meta.findOne({ attributes: ['sendEmails'] })
+			const url = await uploadFile('shifts/', filename, stream, 'application/pdf')
 
-			sendMessage({
-				html: '',
-				to: meta!.sendEmails.join(','),
-				subject: `${shopName} ${moment().format('DD / MMMM / YYYY')}`,
-				attachments: [{
-					filename: fileName,
-					path: filePath
-				}]
-			})
+			const { data } = await axios.get(API_URL + '/settings')
+
+			if (data.sendEmails) {
+				sendMessage({
+					html: '',
+					to: data.sendEmails.join(','),
+					subject: `${shopName} ${moment().format('DD / MMMM / YYYY')}`,
+					attachments: [{
+						href: url,
+						filename
+					}]
+				})
+			}
 		} catch (error) {
-			res.sendStatus(500);
+			if (!resWasSended) {
+				res.sendStatus(500);
+			}
 			throw error;
 		}
 	}

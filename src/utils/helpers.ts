@@ -1,19 +1,14 @@
 import nodemailer from 'nodemailer'
-import handlebars from 'handlebars'
-import htmlPdf, { CreateOptions } from 'html-pdf'
-import fs from 'fs'
+import { ReadStream } from 'fs'
+import aws from 'aws-sdk'
 
 const transporter = nodemailer.createTransport({
-	secure: false,
-	ignoreTLS: true,
-	tls: {
-		rejectUnauthorized: false,
-	},
-	port: 587,
-	host: 'us2.smtp.mailhostbox.com',
+	port: 465,
+	secure: true,
+	host: process.env.SMTP_SERVER,
 	auth: {
-		user: process.env.NOTIFICATIONS_EMAIL,
-		pass: process.env.NOTIFICATIONS_PASSWORD
+		user: process.env.SMTP_USERNAME,
+		pass: process.env.SMTP_PASSWORD
 	}
 })
 
@@ -24,14 +19,9 @@ interface msgAttr {
 	html: string;
 	attachments?: {
 		filename: string;
-		path: string;
+		path?: string;
+		href?: string; 
 	}[];
-}
-
-interface documentAttr {
-	templatePath: string;
-	templateContext: object;
-	outputPath: string
 }
 
 function sendMessage(msg: msgAttr) {
@@ -44,68 +34,36 @@ function sendMessage(msg: msgAttr) {
 	})
 }
 
-const format = {
-	rnc: (rnc: string) =>
-		rnc
-			? `${rnc.substr(0, 3)}-${rnc.substr(3, 5)}-${rnc.substr(8, 1)}`
-			: 'N/A',
-	phone: (phone: string) =>
-		phone
-			? `(${phone.substr(0, 3)}) ${phone.substr(3, 3)}-${phone.substr(
-					6,
-					4
-			  )}`
-			: 'N/A',
-	cash: (amount: number) =>
-		Intl.NumberFormat('es-DO', { minimumFractionDigits: 2 }).format(amount)
-};
-
-function duiIsValid(dui: string): boolean {
-	let isValid: boolean = false;
-	let sum: number = 0;
-
-	if (!dui || dui.length != 11) {
-		return isValid;
+/**
+ * Asynchronously upload file to Digital Ocean Spaces
+ * @param path A path to upload file on Digital Ocean Space
+ * @param fileName A name of file
+ * @param content A content to uplod, can be file, or stream
+ * @param type type of file, like application/pdf
+ * 
+ * @return string url
+ */
+function uploadFile(path: string, fileName: string, content: ReadStream | File, type: 'application/pdf' | 'application/excel') {
+	const spaceEndpoint = new aws.Endpoint(process.env.S3_ENDPOINT!)
+	const s3 = new aws.S3({ endpoint: spaceEndpoint })
+	
+	const uploadParams = {
+		Key: `${path}${fileName}`,
+		Body: content,
+		Bucket: `${process.env.BUCKET_NAME}`,
+		ContentType: type,
+		ACL: 'public-read'
 	}
 
-	const duiIndividualDigits: string[] = dui.split('');
-	const lastDigit: number = Number(duiIndividualDigits.pop());
-
-	duiIndividualDigits.forEach((digit: string | number, index: number) => {
-		digit = Number(digit);
-		const multipler: number = index % 2 ? 2 : 1;
-
-		if (digit * multipler > 9) {
-			sum += Number((digit * multipler).toString().charAt(0));
-			sum += Number((digit * multipler).toString().charAt(1));
-		} else {
-			sum += digit * multipler;
-		}
-	});
-
-	const topTen: number = (Math.floor(sum / 10) + 1) * 10;
-
-	if (lastDigit == topTen - sum) {
-		isValid = true;
-	}
-
-	return isValid;
-}
-
-function generatePdf(document: documentAttr, options?: CreateOptions) {
-	const template = fs.readFileSync(document.templatePath, 'utf8')
-	const html = handlebars.compile(template)(document.templateContext)
-
-	return new Promise((resolve, reject) => {
-		htmlPdf.create(html, options)
-		.toFile(document.outputPath, (error, res) => {
+	return new Promise<string>((resolve, reject) => {
+		s3.upload(uploadParams, (error: any, results: any) => {
 			if (error) {
-				reject(error)
-			} else {
-				resolve(res)
+				return reject(error)
 			}
+			
+			resolve(results.Location)
 		})
 	})
 }
 
-export { duiIsValid, sendMessage, format, generatePdf };
+export { sendMessage, uploadFile };

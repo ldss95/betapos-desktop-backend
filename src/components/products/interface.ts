@@ -4,7 +4,6 @@ export interface ProductAttr extends Model {
 	id: number;
 	name: string;
 	photoUrl: string;
-	stock: number;
 	price: number;
 }
 

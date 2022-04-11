@@ -6,6 +6,8 @@ const Sentry = require('@sentry/node');
 import cors from 'cors';
 import 'dotenv/config';
 
+const { NODE_ENV } = process.env;
+import { listen } from './utils/listener';
 import routes from './routes';
 const app: Express = express();
 
@@ -41,15 +43,20 @@ app.use(
 );
 
 //Error Tracking Sentry
-if (process.env.NODE_ENV == 'production')
+if (NODE_ENV == 'production')
 	Sentry.init({
 		dsn:
 			'https://d33b3cbc04e848faa9f54774ebe3557c@o327190.ingest.sentry.io/5424305'
 	});
 
 //Middlewares
-if (process.env.NODE_ENV == 'production')
+if (NODE_ENV == 'production')
 	app.use(Sentry.Handlers.requestHandler());
+
+if(NODE_ENV == 'development'){
+	const morgan = require('morgan');
+	app.use(morgan('dev'));
+}
 
 //Static Files
 app.use(
@@ -64,11 +71,14 @@ app.use(
 	})
 );
 
+//Listen updates from firebase
+listen()
+
 //Routes
 app.use(routes);
 
 //Error Tracking Sentry
-if (process.env.NODE_ENV == 'production')
+if (NODE_ENV == 'production')
 	app.use(Sentry.Handlers.errorHandler());
 
 export default app;

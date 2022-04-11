@@ -28,10 +28,6 @@ const Product = db.define<ProductAttr>(
 				isUrl: true
 			}
 		},
-		stock: {
-			type: DataTypes.SMALLINT,
-			allowNull: false
-		},
 		price: {
 			type: DataTypes.FLOAT,
 			allowNull: false
@@ -56,13 +52,12 @@ const Barcode = db.define<BarcodeAttr>(
 		},
 		barcode: {
 			type: DataTypes.STRING(30),
-			allowNull: false,
-			unique: true
+			allowNull: false
 		}
 	},
 	{ timestamps: false }
 );
 
-Product.hasMany(Barcode, { foreignKey: 'productId', as: 'barcodes' });
+Product.hasMany(Barcode, { foreignKey: 'productId', as: 'barcodes', onDelete: 'cascade' });
 
 export { Product, Barcode };

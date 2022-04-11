@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 
 import { db } from '../../db/connection';
 import { UserAttr } from './interface';
-import { duiIsValid } from '../../utils/helpers';
+import { duiIsValid } from '@ldss95/helpers';
 
 const User = db.define<UserAttr>('User', {
 	id: {
@@ -48,6 +48,15 @@ const User = db.define<UserAttr>('User', {
 		validate: {
 			isIn: [['ADMIN', 'SELLER']]
 		}
+	},
+	tfa: {
+		type: DataTypes.BOOLEAN,
+		allowNull: false,
+		defaultValue: 0
+	},
+	tfaCode: {
+		type: DataTypes.STRING,
+		allowNull: true
 	},
 	isActive: {
 		type: DataTypes.BOOLEAN,
