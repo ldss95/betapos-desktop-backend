@@ -1,108 +1,141 @@
-import { UniqueConstraintError, ForeignKeyConstraintError } from 'sequelize'
+import { UniqueConstraintError, ForeignKeyConstraintError, Op } from 'sequelize'
 import moment from 'moment'
+import axios from 'axios'
 
 import { firebaseConnection } from '../db/firebase'
-import { Meta } from '../components/meta/model'
 import { Product, Barcode } from '../components/products/model'
 import { User } from '../components/users/model'
+import { Update } from '../components/update/model'
 
-let unsubscribe: any = null
+const API_URL = process.env.API_URL;
+let subscriptions: any = []
 
 async function listen() {
-	const meta = await Meta.findOne({ attributes: ['shopId'] })
-	if (meta) {
-		/**
-			Function to delete doc after get data
-		*/
-		const deleteDoc = (id: string) => {
-			firebaseConnection.collection('updates').doc(id).delete()
+		for(const subscription of subscriptions) {
+			subscription.unsubscribe()
 		}
-
-		/**
-			Catch errors 
-		*/
-		const customCatch = (errors: string[]) => {
-			throw new Error(errors.join("\n\n"))
-		}
-
-		if (unsubscribe)
-			unsubscribe()
 		
-		unsubscribe = firebaseConnection
-			.collection('updates')
-			.where('shopId', '==', meta!.shopId)
-			.onSnapshot(snap => {
-				const { docs } = snap
-				const errors: string[] = []
+		const productsListener = firebaseConnection.collection('updates')
+			.doc('products')
+			.onSnapshot(async snap => {
+				try {
+					const data: any = snap.data();
+					if (!data) {
+						return;
+					}
 
-				const cycleAndSync = (docs: any[]) => {
-					const pending: any[] = []
+					const { deleted, lastUpdate } = data;
+					if (deleted && deleted.length > 0) {
+						Product.destroy({
+							where: {
+								id: {
+									[Op.in]: deleted
+								}
+							}
+						})
+					}
 
-					docs.forEach(async (doc, index) => {
-						try {
-							const { data, type, table } = doc.data()
-							switch (table) {
-								case 'products':
-									if (type == 'create') {
-										await Product.create(data, { include: { model: Barcode, as: 'barcodes' } })
-									} else if (type == 'update') {
-										await Product.update(data, { where: { id: data.id } })
-									}
-			
-									break;
-								case 'barcodes':
-									if (type == 'create') {
-										await Barcode.create(data)
-									} else if (type == 'update') {
-										await Barcode.update(data, { where: { id: data.id } })
-									}
-									break;
-								case 'users':
-									if (type == 'create') {
-										await User.create(data)
-									} else if (type == 'update') {
-										await User.update(data, { where: { id: data.id } })
-									}
-									break;
-							}
-	
-							deleteDoc(doc.id)
-							const now = moment().format('YYYY-MM-DD HH:mm:ss')
-							await Meta.update({ lastUpdate: now }, { where: {} })
-						} catch (error) {
-							if (error instanceof UniqueConstraintError) {
-								deleteDoc(doc.id)
-							} else if (error instanceof ForeignKeyConstraintError) {
-								console.log('Wait to create reference before create.')
-								pending.push(doc)
-							} else if (error.errors) {
-								let message = `\nfirebaseDocumentId: ${doc.id} \n`
-								message += `message: Sync create product: ${error.errors[0].message}`
-									
-								errors.push(message)
-							} else {
-								let message = `\nfirebaseDocumentId: ${doc.id} \n`
-								message += `message: Sync create product: ${JSON.stringify(error)}`
-								
-								errors.push(message)
-							}
-						}
-	
-						const errorQuantity = Object.keys(errors).length
-						if (errorQuantity > 0 && index == (docs.length - 1)) {
-							customCatch(errors)
-						}
+					const update = await Update.findOne({
+						where: { table: 'products' }
 					})
 
-					if (pending.length > 0)
-						cycleAndSync(pending)
-				}
+					if(!update){
+						return;
+					}
 
-				cycleAndSync(docs)
+					if(update.date == lastUpdate){
+						return;
+					}
+
+					const { data: { created, updated } } = await axios.get(
+						`${API_URL}/products/updates/${update.date}`
+					);
+
+					// Productos nuevos
+					await Product.bulkCreate(created, {
+						ignoreDuplicates: true,
+						include: {
+							model: Barcode,
+							as: 'barcodes',
+						}
+					});
+
+					// Productos modificados
+					for(const product of updated){
+						await Product.update(product, {
+							where: {
+								id: product.id
+							}
+						})
+					}
+
+					await update.update({ date: lastUpdate })
+				} catch (error) {
+					throw error;
+				}
 			}, error => {
 				throw error
 			})
-	}
+
+		subscriptions.push(productsListener)
+
+		const barcodesListener = firebaseConnection.collection('updates')
+			.doc('barcodes')
+			.onSnapshot(async snap => {
+				try {
+					const data: any = snap.data();
+					if (!data) {
+						return;
+					}
+
+					const { deleted, lastUpdate } = data;
+					if (deleted && deleted.length > 0) {
+						Barcode.destroy({
+							where: {
+								id: {
+									[Op.in]: deleted
+								}
+							}
+						})
+					}
+
+					const update = await Update.findOne({
+						where: { table: 'barcodes' }
+					})
+
+					if(!update){
+						return;
+					}
+
+					if(update.date == lastUpdate){
+						return;
+					}
+
+					const { data: { created, updated } } = await axios.get(
+						`${API_URL}/barcodes/updates/${update.date}`
+					);
+
+					// Barcodes nuevos
+					await Barcode.bulkCreate(created, { ignoreDuplicates: true });
+
+					// Barcodes modificados
+					for(const barcode of updated){
+						await Barcode.update(barcode, {
+							where: {
+								id: barcode.id
+							}
+						})
+					}
+
+					await update.update({ date: lastUpdate })
+				} catch (error) {
+					throw error;
+				}
+			}, error => {
+				throw error
+			})
+
+		subscriptions.push(barcodesListener)
 }
 
 export { listen }
