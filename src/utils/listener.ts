@@ -53,12 +53,13 @@ async function listen() {
 
 					// Productos nuevos
 					await Product.bulkCreate(created, {
-						ignoreDuplicates: true,
-						include: {
-							model: Barcode,
-							as: 'barcodes',
-						}
+						ignoreDuplicates: true
 					});
+
+					// Codigos de barra nuevos
+					await Barcode.bulkCreate(created.map(({ barcodes }: any) => barcodes).flat(), {
+						ignoreDuplicates: true
+					})
 
 					// Productos modificados
 					for(const product of updated){
@@ -71,7 +72,8 @@ async function listen() {
 
 					await update.update({ date: lastUpdate })
 				} catch (error) {
-					throw error;
+					console.log(error)
+					// throw error;
 				}
 			}, error => {
 				throw error
