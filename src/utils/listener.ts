@@ -8,14 +8,14 @@ import { User } from '../components/users/model'
 import { Update } from '../components/update/model'
 
 const API_URL = process.env.API_URL;
-let subscriptions: any = []
+let unsubscribers: any = []
 
 async function listen() {
-		for(const subscription of subscriptions) {
-			subscription.unsubscribe()
+		for(const unsubscribe of unsubscribers) {
+			unsubscribe()
 		}
 		
-		const productsListener = firebaseConnection.collection('updates')
+		const productsUnsubscriber = firebaseConnection.collection('updates')
 			.doc('products')
 			.onSnapshot(async snap => {
 				try {
@@ -77,9 +77,9 @@ async function listen() {
 				throw error
 			})
 
-		subscriptions.push(productsListener)
+		unsubscribers.push(productsUnsubscriber)
 
-		const barcodesListener = firebaseConnection.collection('updates')
+		const barcodesUnsubscribers = firebaseConnection.collection('updates')
 			.doc('barcodes')
 			.onSnapshot(async snap => {
 				try {
@@ -135,7 +135,7 @@ async function listen() {
 				throw error
 			})
 
-		subscriptions.push(barcodesListener)
+		unsubscribers.push(barcodesUnsubscribers)
 }
 
 export { listen }
