@@ -57,6 +57,7 @@
     "@types/nodemailer": "^6.4.0",
     "@types/sequelize": "^4.28.9",
     "@types/shortid": "0.0.29",
+    "morgan": "^1.10.0",
     "nodemon": "^2.0.4",
     "sequelize-cli": "^6.2.0",
     "ts-node": "^9.0.0",
