@@ -138,6 +138,65 @@ async function listen() {
 			})
 
 		unsubscribers.push(barcodesUnsubscribers)
+
+		const usersUnsubscribers = firebaseConnection.collection('updates')
+			.doc('users')
+			.onSnapshot(async snap => {
+				try {
+					const data: any = snap.data();
+					if (!data) {
+						return;
+					}
+
+					// Usuarios eliminados
+					const { deleted, lastUpdate } = data;
+					if (deleted && deleted.length > 0) {
+						User.destroy({
+							where: {
+								id: {
+									[Op.in]: deleted
+								}
+							}
+						})
+					}
+
+					const update = await Update.findOne({
+						where: { table: 'users' }
+					})
+
+					if(!update){
+						return;
+					}
+
+					if(update.date == lastUpdate){
+						return;
+					}
+
+					const { data: { created, updated } } = await axios.get(
+						`${API_URL}/users/updates/${update.date}`
+					);
+
+					// Usuarios modificados
+					for(const user of updated){
+						await User.update(user, {
+							where: {
+								id: user.id
+							}
+						})
+					}
+
+					// Usuarios nuevos
+					await User.bulkCreate(created, { ignoreDuplicates: true });
+
+					await update.update({ date: lastUpdate })
+				} catch (error) {
+					throw error;
+				}
+			}, error => {
+				throw error
+			})
+
+		unsubscribers.push(usersUnsubscribers)
 }
 
 export { listen }
