@@ -1,5 +1,4 @@
-import { UniqueConstraintError, ForeignKeyConstraintError, Op } from 'sequelize'
-import moment from 'moment'
+import { Op } from 'sequelize'
 import axios from 'axios'
 
 import { firebaseConnection } from '../db/firebase'
@@ -24,6 +23,7 @@ async function listen() {
 						return;
 					}
 
+					// Productos eliminados
 					const { deleted, lastUpdate } = data;
 					if (deleted && deleted.length > 0) {
 						Product.destroy({
@@ -51,6 +51,15 @@ async function listen() {
 						`${API_URL}/products/updates/${update.date}`
 					);
 
+					// Productos modificados
+					for(const product of updated){
+						await Product.update(product, {
+							where: {
+								id: product.id
+							}
+						})
+					}
+
 					// Productos nuevos
 					await Product.bulkCreate(created, {
 						ignoreDuplicates: true
@@ -60,15 +69,6 @@ async function listen() {
 					await Barcode.bulkCreate(created.map(({ barcodes }: any) => barcodes).flat(), {
 						ignoreDuplicates: true
 					})
-
-					// Productos modificados
-					for(const product of updated){
-						await Product.update(product, {
-							where: {
-								id: product.id
-							}
-						})
-					}
 
 					await update.update({ date: lastUpdate })
 				} catch (error) {
@@ -90,6 +90,7 @@ async function listen() {
 						return;
 					}
 
+					// Barcodes eliminados
 					const { deleted, lastUpdate } = data;
 					if (deleted && deleted.length > 0) {
 						Barcode.destroy({
@@ -117,9 +118,6 @@ async function listen() {
 						`${API_URL}/barcodes/updates/${update.date}`
 					);
 
-					// Barcodes nuevos
-					await Barcode.bulkCreate(created, { ignoreDuplicates: true });
-
 					// Barcodes modificados
 					for(const barcode of updated){
 						await Barcode.update(barcode, {
@@ -128,6 +126,9 @@ async function listen() {
 							}
 						})
 					}
+
+					// Barcodes nuevos
+					await Barcode.bulkCreate(created, { ignoreDuplicates: true });
 
 					await update.update({ date: lastUpdate })
 				} catch (error) {
@@ -138,6 +139,65 @@ async function listen() {
 			})
 
 		unsubscribers.push(barcodesUnsubscribers)
+
+		const usersUnsubscribers = firebaseConnection.collection('updates')
+			.doc('users')
+			.onSnapshot(async snap => {
+				try {
+					const data: any = snap.data();
+					if (!data) {
+						return;
+					}
+
+					// Usuarios eliminados
+					const { deleted, lastUpdate } = data;
+					if (deleted && deleted.length > 0) {
+						User.destroy({
+							where: {
+								id: {
+									[Op.in]: deleted
+								}
+							}
+						})
+					}
+
+					const update = await Update.findOne({
+						where: { table: 'users' }
+					})
+
+					if(!update){
+						return;
+					}
+
+					if(update.date == lastUpdate){
+						return;
+					}
+
+					const { data: { created, updated } } = await axios.get(
+						`${API_URL}/users/updates/${update.date}`
+					);
+
+					// Usuarios modificados
+					for(const user of updated){
+						await User.update(user, {
+							where: {
+								id: user.id
+							}
+						})
+					}
+
+					// Usuarios nuevos
+					await User.bulkCreate(created, { ignoreDuplicates: true });
+
+					await update.update({ date: lastUpdate })
+				} catch (error) {
+					throw error;
+				}
+			}, error => {
+				throw error
+			})
+
+		unsubscribers.push(usersUnsubscribers)
 }
 
 export { listen }
