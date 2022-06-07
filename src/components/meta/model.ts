@@ -4,10 +4,6 @@ import { db } from '../../db/connection'
 import { MetaAttr } from './interface'
 
 const Meta = db.define<MetaAttr>('Meta', {
-	shopId: {
-		type: DataTypes.TINYINT,
-		allowNull: false
-	},
 	lastTicketNumber: {
 		type: DataTypes.BIGINT,
 		allowNull: false
@@ -20,24 +16,28 @@ const Meta = db.define<MetaAttr>('Meta', {
 		}
 	},
 	sendEmails: {
-		type: DataTypes.STRING,
-		allowNull: true,
-		get() {
-			const value = this.getDataValue('sendEmails')
-			return (value) ? value.split(',') : value
-		},
-		set(value: string[]) {
-			this.setDataValue('sendEmails', value.join(','))
-		}
+		type: DataTypes.JSON,
+		allowNull: true
 	},
 	allowToInvoiceGenericProduct: {
 		type: DataTypes.BOOLEAN,
 		allowNull: false,
 		defaultValue: true
 	},
-	lastUpdate: {
-		type: DataTypes.DATE,
-		allowNull: true
+	defaultSalesMode: {
+		type: DataTypes.ENUM('SEARCH', 'BARCODE'),
+		allowNull: false,
+		defaultValue: 'BARCODE'
+	},
+	scalePrefix: DataTypes.STRING(10),
+	scaleDecimalsWight: DataTypes.TINYINT,
+	scaleIntWight: DataTypes.TINYINT,
+	scaleBarcodeLength: DataTypes.TINYINT,
+	printerName: DataTypes.STRING,
+	cardTransactionCost: {
+		type: DataTypes.DECIMAL(10, 2),
+		allowNull: false,
+		defaultValue: 0
 	}
 }, { timestamps: false })
 

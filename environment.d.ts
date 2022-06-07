@@ -9,7 +9,6 @@ declare namespace NodeJS {
 		NODE_ENV: 'development' | 'production' | 'test';
 		SECRET_SESSION: string;
 		SECRET_TOKEN: string;
-		CLIENT_URL: string;
 		API_URL: string;
 		SMTP_SERVER: string;
 		SMTP_USERNAME: string;

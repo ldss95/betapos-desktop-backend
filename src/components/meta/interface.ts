@@ -1,10 +1,15 @@
 import { Model } from 'sequelize'
 
 export interface MetaAttr extends Model {
-    shopId: number;
-    lastTicketNumber: number;
-    printerIp: string;
-    sendEmails: string[];
-    allowToInvoiceGenericProduct: boolean;
-    lastUpdate: string;
+	lastTicketNumber: number;
+	printerIp: string;
+	sendEmails: string[];
+	allowToInvoiceGenericProduct: boolean;
+	defaultSalesMode: 'SEARCH' | 'BARCODE';
+	scalePrefix: string;
+	scaleDecimalsWight: number;
+	scaleIntWight: number;
+	scaleBarcodeLength: number;
+	printerName: string;
+	cardTransactionCost: number;
 }
