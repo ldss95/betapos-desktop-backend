@@ -12,10 +12,19 @@ export default {
 			const { nickName, password } = req.body;
 
 			const results = await User.findOne({
-				attributes: ['id', 'name', 'password', 'role', 'isActive', 'tfa', 'tfaCode'],
+				attributes: [
+					'id',
+					'firstName',
+					'lastName',
+					'password',
+					'photoUrl',
+					'role',
+					'isActive',
+					'tfa',
+					'tfaCode'
+				],
 				where: { nickName }
 			})
-
 			
 			if (!results) {
 				res.status(401).send({
@@ -68,9 +77,11 @@ export default {
 				tfa: user.tfa,
 				token: token,
 				nickName,
-				name: user.name,
+				firstName: user.firstName,
+				lastName: user.lastName,
 				role: user.role,
 				phone: user.phone,
+				photoUrl: user.photoUrl,
 				dui: user.dui,
 				id: user.id
 			});
@@ -94,7 +105,7 @@ export default {
 
 		User.findOne({
 			raw: true,
-			attributes: ['id', 'name', 'password', 'role', 'isActive', 'tfa', 'tfaCode'],
+			attributes: ['id', 'firstName', 'lastName', 'password', 'role', 'isActive', 'tfa', 'tfaCode'],
 			where: { nickName }
 		})
 			.then((user: any) => {
