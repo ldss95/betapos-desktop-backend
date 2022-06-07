@@ -10,7 +10,11 @@ const User = db.define<UserAttr>('User', {
 		defaultValue: DataTypes.UUIDV4,
 		primaryKey: true,
 	},
-	name: {
+	firstName: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	lastName: {
 		type: DataTypes.STRING,
 		allowNull: false
 	},
@@ -41,6 +45,12 @@ const User = db.define<UserAttr>('User', {
 	phone: {
 		type: DataTypes.STRING(10),
 		allowNull: true
+	},
+	photoUrl: {
+		type: DataTypes.STRING,
+		validate: {
+			isUrl: true
+		}
 	},
 	birthday: {
 		type: DataTypes.DATEONLY,
