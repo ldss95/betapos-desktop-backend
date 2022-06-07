@@ -44,7 +44,7 @@ const CashFlow = db.define<CashFlowAttr>('CashFlow', {
 		}
 	},
 	userId: {
-		type: DataTypes.SMALLINT,
+		type: DataTypes.UUID,
 		allowNull: false
 	},
 	shiftId: {

@@ -7,10 +7,9 @@ const Product = db.define<ProductAttr>(
 	'Product',
 	{
 		id: {
-			type: DataTypes.INTEGER,
-			primaryKey: true,
-			autoIncrement: true,
-			allowNull: false
+			type: DataTypes.UUID,
+			defaultValue: DataTypes.UUIDV4,
+			primaryKey: true
 		},
 		name: {
 			type: DataTypes.STRING,
@@ -47,7 +46,7 @@ const Barcode = db.define<BarcodeAttr>(
 			allowNull: false
 		},
 		productId: {
-			type: DataTypes.INTEGER,
+			type: DataTypes.UUID,
 			allowNull: false
 		},
 		barcode: {

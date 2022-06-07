@@ -1,7 +1,6 @@
 import express, { Express } from 'express';
 import session from 'express-session';
 const MySqlStore = require('express-mysql-session')(session);
-import path from 'path';
 const Sentry = require('@sentry/node');
 import cors from 'cors';
 import 'dotenv/config';
@@ -57,19 +56,6 @@ if(NODE_ENV == 'development'){
 	const morgan = require('morgan');
 	app.use(morgan('dev'));
 }
-
-//Static Files
-app.use(
-	express.static(path.join(__dirname, 'public'), {
-		setHeaders: (res, path) => {
-			if (path.endsWith('.css') || path.endsWith('.js'))
-				res.setHeader('Cache-Control', 'max-age=31557600');
-			else if (path.endsWith('.jpg') || path.endsWith('.png'))
-				res.setHeader('Cache-Control', 'max-age=86400');
-			else res.setHeader('Cache-Control', 'no-cache');
-		}
-	})
-);
 
 //Listen updates from firebase
 listen()

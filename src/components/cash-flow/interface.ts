@@ -6,7 +6,7 @@ export interface CashFlowAttr extends Model {
 	amount: number;
 	description: string;
 	cashDetail: { amount: number, quantity: number }[];
-	userId: number;
+	userId: string;
 	shiftId: string;
 	createdAt?: string;
 	updatedAt?: string;

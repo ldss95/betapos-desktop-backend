@@ -19,7 +19,7 @@ const TicketProduct = db.define<TicketProductAttr>(
 			allowNull: false
 		},
 		productId: {
-			type: DataTypes.INTEGER,
+			type: DataTypes.UUID,
 			allowNull: false
 		},
 		quantity: {

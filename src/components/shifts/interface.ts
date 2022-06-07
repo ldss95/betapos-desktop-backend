@@ -2,7 +2,7 @@ import { Model } from 'sequelize';
 
 export interface ShiftAttr extends Model {
 	id?: string;
-	userId: number;
+	userId: string;
 	startAmount: number;
 	startTime?: string;
 	endAmount?: number;

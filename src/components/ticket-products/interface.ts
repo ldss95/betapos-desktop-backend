@@ -2,7 +2,7 @@ import { Model } from 'sequelize';
 
 export interface TicketProductAttr extends Model {
 	ticketId: string;
-	productId: number;
+	productId: string;
 	quantity: number;
 	price: number;
 }

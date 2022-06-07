@@ -8,10 +8,7 @@ const Update = db.define<UpdatesAttr>('Update', {
 		type: DataTypes.STRING,
 		primaryKey: true
 	},
-	date: {
-		type: DataTypes.DATE,
-		allowNull: false
-	}
+	date: DataTypes.DATE
 }, { timestamps: false })
 
 export { Update }

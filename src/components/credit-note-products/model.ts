@@ -19,7 +19,7 @@ const CreditNoteProduct = db.define<CreditNoteProductAttr>(
 			allowNull: false
 		},
 		productId: {
-			type: DataTypes.INTEGER,
+			type: DataTypes.UUID,
 			allowNull: false
 		},
 		quantity: {

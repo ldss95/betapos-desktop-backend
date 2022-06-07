@@ -15,7 +15,7 @@ const Shift = db.define<ShiftAttr>(
 			unique: true
 		},
 		userId: {
-			type: DataTypes.SMALLINT,
+			type: DataTypes.UUID,
 			allowNull: false
 		},
 		startAmount: {

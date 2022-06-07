@@ -1,9 +1,10 @@
 import { Model } from 'sequelize';
 
 export interface UserAttr extends Model {
-	id: number;
+	id: string;
 	name: string;
-	nickName: string;
+	email?: string;
+	nickName?: string;
 	password: string;
 	dui: string;
 	phone: string;

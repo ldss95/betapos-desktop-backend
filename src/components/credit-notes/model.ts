@@ -30,7 +30,7 @@ const CreditNote = db.define<CreditNoteAttr>(
 			allowNull: false
 		},
 		userId: {
-			type: DataTypes.SMALLINT,
+			type: DataTypes.UUID,
 			allowNull: false
 		},
 		status: {
