@@ -4,7 +4,6 @@ import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy'
 
 import { User } from '../users/model';
-import { Meta } from '../meta/model'
 
 export default {
 	login: async (req: Request, res: Response) => {
@@ -34,7 +33,6 @@ export default {
 				return;
 			}
 			
-			
 			const user = results.get({ plain: true })
 			if (!user.isActive) {
 				res.status(401).send({
@@ -55,10 +53,10 @@ export default {
 			delete user.password;
 
 			const payload = {
-				iss: '20&10-Caja',
+				iss: 'betapos-desktop',
 				aud: 'web',
 				iat: new Date().getTime() / 1000,
-				user: [user.id, user.name, user.nickName, user.role]
+				user: [user.id, user.firstName, user.lastName, user.nickName, user.role]
 			};
 
 			const token = jwt.sign(payload, `${process.env.SECRET_TOKEN}`, {
@@ -68,9 +66,6 @@ export default {
 			const isLoggedIn = !user.tfa
 			req.session!.isLoggedIn = isLoggedIn
 			req.session!.user = { ...user, token }
-
-			const meta = await Meta.findOne()
-			req.session!.shopId = meta?.shopId
 
 			res.status(200).send({
 				isLoggedIn,

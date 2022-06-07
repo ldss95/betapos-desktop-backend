@@ -21,7 +21,6 @@ export default {
 			cashFlow = cashFlow.get()
 			cashFlow.createdAt = moment(cashFlow.createdAt).format('YYYY-MM-DD HH:mm:ss')
 			cashFlow.updatedAt = moment(cashFlow.updatedAt).format('YYYY-MM-DD HH:mm:ss')
-			cashFlow.shopId = req.session!.shopId
 			sendToAPI({
 				path: '/cash-flow',
 				method: 'POST',

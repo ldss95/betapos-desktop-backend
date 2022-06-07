@@ -25,7 +25,6 @@ export default {
 				res.status(201).send(results)
 
 				const shift = results.get({ plain: true })
-				shift.shopId = req.session!.shopId
 				shift.startTime = moment(shift.startTime).format('HH:mm:ss')
 				shift.startCash = shift.startAmount
 

@@ -20,7 +20,6 @@ export default {
 			const ticketNumberStr = savedTicket.ticketNumber.toString()
 			const ticketNumberPaded = ticketNumberStr.padStart(8, '0')
 			savedTicket.ticketNumber = `${prefix}-${ticketNumberPaded}`;
-			savedTicket.shopId = shop.id
 
 			sendToAPI({
 				path: '/tickets',
