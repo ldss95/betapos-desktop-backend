@@ -99,7 +99,7 @@ const sendToAPI = (input: SendToApiInput) => {
 	*/
 	const client = (isProduction) ? https : http;
 	
-	//Get hostname, remove protocol and separate port from hostname
+	// Get hostname, remove protocol and separate port from hostname
 	let hostname = API_URL!.replace('https://', '').replace('http://', '')
 	let port: number;
 	if (hostname.includes(':')) {
@@ -122,6 +122,10 @@ const sendToAPI = (input: SendToApiInput) => {
 
 	const req = client.request(options, (res) => {
 		const { statusCode } = res
+		if (statusCode! > 299) {
+			return onError()
+		}
+
 		callback((statusCode == 201 || 204) ? true : false)
 
 		res.on('data', (d) => {
@@ -129,7 +133,9 @@ const sendToAPI = (input: SendToApiInput) => {
 		});
 	});
 
-	req.on('error', () => {
+	req.on('error', onError);
+
+	function onError(){
 		if (reTry && attemp < 3) {
 			setTimeout(() => {
 				sendToAPI({
@@ -149,7 +155,7 @@ const sendToAPI = (input: SendToApiInput) => {
 		}
 
 		callback(false)
-	});
+	}
 
 	req.write(JSON.stringify(data));
 	req.end();
