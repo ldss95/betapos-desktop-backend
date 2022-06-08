@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy'
 
 import { User } from '../users/model';
+import { Business } from '../business/model';
 
 export default {
 	login: async (req: Request, res: Response) => {
@@ -67,6 +68,8 @@ export default {
 			req.session!.isLoggedIn = isLoggedIn
 			req.session!.user = { ...user, token }
 
+			const business = await Business.findOne();
+
 			res.status(200).send({
 				isLoggedIn,
 				tfa: user.tfa,
@@ -78,7 +81,8 @@ export default {
 				phone: user.phone,
 				photoUrl: user.photoUrl,
 				dui: user.dui,
-				id: user.id
+				id: user.id,
+				businessName: business?.name
 			});
 		} catch (error) {
 			res.sendStatus(500);
