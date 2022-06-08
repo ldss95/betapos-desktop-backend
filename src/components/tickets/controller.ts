@@ -8,7 +8,7 @@ import { sendToAPI } from '../sync/controller'
 export default {
 	create: async (req: Request, res: Response) => {
 		try {
-			const { ticket, products, shop } = req.body;
+			const { ticket, products } = req.body;
 			ticket.userId = req.session!.user.id;
 
 			const results = await Ticket.create({ ...ticket, products }, {
@@ -16,13 +16,13 @@ export default {
 			});
 
 			const savedTicket = results.get({ plain: true })
-			const prefix = 'D-' + shop.prefix
+
 			const ticketNumberStr = savedTicket.ticketNumber.toString()
 			const ticketNumberPaded = ticketNumberStr.padStart(8, '0')
-			savedTicket.ticketNumber = `${prefix}-${ticketNumberPaded}`;
+			savedTicket.ticketNumber = `D-${ticketNumberPaded}`;
 
 			sendToAPI({
-				path: '/tickets',
+				path: '/sales',
 				data: { ticket: savedTicket },
 				reTry: true,
 				method: 'POST',
