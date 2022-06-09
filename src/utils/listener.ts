@@ -91,8 +91,7 @@ async function listen() {
 				}
 			})
 		} catch (error) {
-			console.log(error)
-			// throw error;
+			throw error;
 		}
 	}, (error: any) => {
 		throw error
