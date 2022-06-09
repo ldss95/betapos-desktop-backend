@@ -1,6 +1,11 @@
 import { Model } from 'sequelize'
 
 export interface MetaAttr extends Model {
+	device: {
+		deviceId: string;
+		name: string;
+		isActive: boolean;
+	};
 	lastTicketNumber: number;
 	printerIp: string;
 	sendEmails: string[];

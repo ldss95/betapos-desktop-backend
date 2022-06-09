@@ -116,7 +116,8 @@ const sendToAPI = (input: SendToApiInput) => {
 		path,
 		method,
 		headers: {
-			'Content-Type': 'application/json'
+			'Content-Type': 'application/json',
+			merchantId: process.env.MERCHANT_ID
 		}
 	};
 

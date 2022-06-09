@@ -7,6 +7,7 @@ import { Product, Barcode } from '../components/products/model'
 import { User } from '../components/users/model'
 import { Update } from '../components/update/model'
 import { Business } from '../components/business/model'
+import { Meta } from '../components/meta/model'
 
 const {
 	API_URL,
@@ -272,6 +273,10 @@ async function listen() {
 						table: 'barcodes',
 						date: res.data.createdAt
 					},
+					{
+						table: 'devices',
+						date: res.data.createdAt
+					}
 				], { ignoreDuplicates: true })
 
 				return;
@@ -301,6 +306,64 @@ async function listen() {
 	})
 
 	unsubscribers.push(businessUnsubscribers)
+
+	const devicesRef = doc(db, MERCHANT_ID, 'devices')
+	const devicesUnsubscribers = onSnapshot(devicesRef, async (doc) => {
+		try {
+			const data: any = doc.data();
+			if (!data) {
+				return;
+			}
+
+			const { lastUpdate } = data;
+			const meta = await Meta.findOne();
+			if(!meta){
+				return;
+			}
+
+			const res = await axios.get(
+				`${API_URL}/devices/updates/${lastUpdate}`,
+				{
+					headers: {
+						merchantId: MERCHANT_ID,
+						deviceId: meta.device.deviceId
+					}
+				}
+			);
+
+			if (!res.data) {
+				return;
+			}
+
+			const update = await Update.findOne({
+				where: { table: 'devices' }
+			})
+
+			if(!update){
+				await Update.create({ table: 'devices' });
+			}
+
+			if(update?.date == lastUpdate){
+				return;
+			}
+
+			await meta.update({
+				device: {
+					name: res.data.name,
+					isActive: res.data.isActive,
+				}
+			});
+			await Update.update({ date: lastUpdate }, {
+				where: { table: 'devices' }
+			})
+		} catch (error) {
+			throw error;
+		}
+	}, (error: any) => {
+		throw error
+	})
+
+	unsubscribers.push(devicesUnsubscribers)
 }
 
 export { listen }
