@@ -5,6 +5,7 @@ export interface MetaAttr extends Model {
 		deviceId: string;
 		name: string;
 		isActive: boolean;
+		pushNotificationsToken: string;
 	};
 	lastTicketNumber: number;
 	printerIp: string;

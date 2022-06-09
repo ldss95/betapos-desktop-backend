@@ -5,11 +5,12 @@ import speakeasy from 'speakeasy'
 
 import { User } from '../users/model';
 import { Business } from '../business/model';
+import { Meta } from '../meta/model';
 
 export default {
 	login: async (req: Request, res: Response) => {
 		try {
-			const { nickName, password } = req.body;
+			const { nickName, password, pushNotificationsToken } = req.body;
 
 			const results = await User.findOne({
 				attributes: [
@@ -52,6 +53,16 @@ export default {
 			}
 
 			delete user.password;
+
+			const meta = await Meta.findOne()
+			if(meta && (!meta?.device.pushNotificationsToken || meta?.device.pushNotificationsToken !== pushNotificationsToken)) {
+				await meta.update({
+					device: {
+						...meta.device,
+						pushNotificationsToken
+					}
+				})
+			}
 
 			const payload = {
 				iss: 'betapos-desktop',
