@@ -4,63 +4,73 @@ import http from 'http';
 import https from 'https';
 import { Sync } from './model'
 import { listen } from '../../utils/listener'
+import { Meta } from '../meta/model';
 
-const sync = (req: Request, res: Response) => {
-	listen()
-	const { wait } = req.body
-	let responseIsSend = false
+const sync = async (req: Request, res: Response) => {
+	try {
+		listen()
+		const { wait } = req.body
+		let responseIsSend = false
 
-	Sync.findAll({ where: { status: 'PENDING' } })
-		.then(records => {
-			records.forEach(record => {
-				sendToAPI({
-					path: record.path,
-					data: record.data,
-					isNew: false,
-					method: record.method,
-					reTry: (wait) ? false : true, //If client is waiting for response, no re try send to api when fail.
-					attemp: 1,
-					callback: (isSaved: boolean) => {
-						if (!isSaved && !responseIsSend) {
-							res.status(200).send({ allIsDone: false })
-							responseIsSend = true
-							return
-						}
+		const meta = await Meta.findOne();
 
-						if (isSaved) {
-							record.update({ status: 'DONE' })
-								.catch(error => {
-									throw error
-								})
+		if (!meta) {
+			console.error('No device ID found')
+			return res.sendStatus(500)
+		}
 
-							/*
-								If the client is waiting response,
-								verify if all done, then send response.
-							*/
-							if (wait) {
-								records = records.filter(item => item.id != record.id)
+		const { device: { deviceId } } = meta
+		let pending = await Sync.findAll({ where: { status: 'PENDING' } })
+		pending.forEach(record => {
+			sendToAPI({
+				deviceId,
+				path: record.path,
+				data: record.data,
+				isNew: false,
+				method: record.method,
+				reTry: (wait) ? false : true, //If client is waiting for response, no re try send to api when fail.
+				attemp: 1,
+				callback: (isSaved: boolean) => {
+					if (!isSaved && !responseIsSend) {
+						res.status(200).send({ allIsDone: false })
+						responseIsSend = true
+						return
+					}
 
-								if (records.length == 0) {
-									res.status(200).send({ allIsDone: true })
-								}
+					if (isSaved) {
+						record.update({ status: 'DONE' })
+							.catch(error => {
+								throw error
+							})
+
+						/*
+							If the client is waiting response,
+							verify if all done, then send response.
+						*/
+						if (wait) {
+							pending = pending.filter(item => item.id != record.id)
+
+							if (pending.length == 0) {
+								res.status(200).send({ allIsDone: true })
 							}
 						}
 					}
-				})
+				}
 			})
-
-			/*
-				If the client is not waiting response,
-				end http request and continue process
-			*/
-			if (!wait) {
-				res.sendStatus(202)
-				responseIsSend = true
-			}
-		}).catch(error => {
-			res.sendStatus(500)
-			throw error
 		})
+
+		/*
+			If the client is not waiting response,
+			end http request and continue process
+		*/
+		if (!wait) {
+			res.sendStatus(202)
+			responseIsSend = true
+		}
+	}catch(error) {
+		res.sendStatus(500)
+		throw error
+	}
 }
 
 const create = (url: string, data: object) => {
@@ -83,16 +93,17 @@ interface SendToApiInput {
 	data: object;
 	isNew: boolean,
 	reTry: boolean;
-	attemp: number,
+	attemp: number;
 	method: 'POST' | 'PUT';
-	callback: CallableFunction
+	callback: CallableFunction;
+	deviceId: string;
 }
 
 const sendToAPI = (input: SendToApiInput) => {
 	const API_URL = process.env.API_URL
 	const isProduction = (process.env.NODE_ENV == 'production')
 
-	const { path, data, isNew, callback, reTry, attemp, method } = input
+	const { path, data, isNew, callback, reTry, attemp, method, deviceId } = input
 
 	/**
 		Determine which client to use, depending on whether we are in production or not. While in a development environment http will be used, in production https will be used
@@ -117,7 +128,8 @@ const sendToAPI = (input: SendToApiInput) => {
 		method,
 		headers: {
 			'Content-Type': 'application/json',
-			merchantId: process.env.MERCHANT_ID
+			merchantId: process.env.MERCHANT_ID,
+			deviceId
 		}
 	};
 

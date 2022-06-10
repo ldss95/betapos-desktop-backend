@@ -8,6 +8,7 @@ import axios from 'axios'
 
 import { Shift } from './model';
 import { Ticket } from '../tickets/model'
+import { Meta } from '../meta/model'
 import { CashFlow } from '../cash-flow/model'
 import { sendToAPI } from '../sync/controller'
 import { sendMessage, uploadFile } from '../../utils/helpers';
@@ -17,31 +18,31 @@ moment.locale('es')
 const API_URL = process.env.API_URL;
 
 export default {
-	create: (req: Request, res: Response) => {
-		const { amount } = req.body;
+	create: async (req: Request, res: Response) => {
+		try {
+			const { amount } = req.body;
 
-		Shift.create({ startAmount: amount, userId: req.session!.user.id })
-			.then((results) => {
-				res.status(201).send(results)
+			const results = await Shift.create({ startAmount: amount, userId: req.session!.user.id })
+			res.status(201).send(results)
 
-				const shift = results.get({ plain: true })
-				shift.startTime = moment(shift.startTime).format('HH:mm:ss')
-				shift.startCash = shift.startAmount
-
-				sendToAPI({
-					path: '/shifts',
-					data: { shift },
-					reTry: true,
-					method: 'POST',
-					attemp: 1,
-					isNew: true,
-					callback: () => { }
-				})
+			const shift = results.get({ plain: true })
+			shift.startTime = moment(shift.startTime).format('HH:mm:ss')
+			shift.startCash = shift.startAmount
+			const meta = await Meta.findOne();
+			sendToAPI({
+				deviceId: meta?.device?.deviceId!,
+				path: '/shifts',
+				data: { shift },
+				reTry: true,
+				method: 'POST',
+				attemp: 1,
+				isNew: true,
+				callback: () => { }
 			})
-			.catch((error) => {
-				res.sendStatus(500);
-				throw error;
-			});
+		} catch (error) {
+			res.sendStatus(500);
+			throw error;
+		}
 	},
 	getAll: (req: Request, res: Response) => {
 		const user = req.session!.user.id;
@@ -123,8 +124,9 @@ export default {
 			const cashFlow = await CashFlow.findAll({ where: { shiftId: shift.id }, raw: true })
 			const incomeAmount = cashFlow.filter(item => item.type == 'IN').reduce((sum, item) => sum + item.amount, 0)
 			const expensesAmount = cashFlow.filter(item => item.type == 'OUT').reduce((sum, item) => sum + item.amount, 0)
-
+			const meta = await Meta.findOne();
 			sendToAPI({
+				deviceId: meta?.device?.deviceId!,
 				path: '/shifts',
 				method: 'PUT',
 				data: {

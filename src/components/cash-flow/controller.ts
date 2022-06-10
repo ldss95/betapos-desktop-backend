@@ -5,6 +5,7 @@ import moment from 'moment'
 import { CashFlow } from './model';
 import { Ticket } from '../tickets/model'
 import { sendToAPI } from '../sync/controller'
+import { Meta } from '../meta/model'
 
 export default {
 	create: async (req: Request, res: Response) => {
@@ -21,7 +22,9 @@ export default {
 			cashFlow = cashFlow.get()
 			cashFlow.createdAt = moment(cashFlow.createdAt).format('YYYY-MM-DD HH:mm:ss')
 			cashFlow.updatedAt = moment(cashFlow.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+			const meta = await Meta.findOne();
 			sendToAPI({
+				deviceId: meta?.device?.deviceId!,
 				path: '/cash-flow',
 				method: 'POST',
 				data: { cashFlow },

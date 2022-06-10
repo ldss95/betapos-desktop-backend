@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { Product } from '../products/model';
 import { Ticket } from './model';
 import { TicketProduct } from '../ticket-products/model';
+import { Meta } from '../meta/model';
 import { sendToAPI } from '../sync/controller'
 
 export default {
@@ -21,7 +22,9 @@ export default {
 			const ticketNumberPaded = ticketNumberStr.padStart(8, '0')
 			savedTicket.ticketNumber = `D-${ticketNumberPaded}`;
 
+			const meta = await Meta.findOne();
 			sendToAPI({
+				deviceId: meta?.device?.deviceId!,
 				path: '/sales',
 				data: { ticket: savedTicket },
 				reTry: true,
