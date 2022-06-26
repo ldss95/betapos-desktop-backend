@@ -1,13 +1,18 @@
 import { Model } from 'sequelize';
 
 import { TicketProductAttr } from '../ticket-products/interface';
+import { TicketPaymentAttr } from '../ticket-payments/interface';
 
 export interface TicketAttr extends Model {
 	id?: string;
 	ticketNumber: number | string;
+	clientId?: string;
 	amount: number;
 	status: 'IN PROCESS' | 'DONE' | 'PAUSED' | 'CANCELLED';
-	TicketProducts?: TicketProductAttr[];
+	products?: TicketProductAttr[];
+	payments: TicketPaymentAttr[];
+	orderType: 'DELIVERY' | 'PICKUP';
+	shippingAddress?: string;
 	createdAt?: string;
 	updatedAt?: string;
 }

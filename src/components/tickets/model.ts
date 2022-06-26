@@ -3,8 +3,10 @@ import { DataTypes } from 'sequelize';
 import { db } from '../../db/connection';
 import { TicketAttr } from './interface';
 import { User } from '../users/model';
+import { Client } from '../clients/model';
 import { Shift } from '../shifts/model';
 import { TicketProduct } from '../ticket-products/model';
+import { TicketPayment } from '../ticket-payments/model';
 import { Meta } from '../meta/model';
 
 const Ticket = db.define<TicketAttr>(
@@ -21,6 +23,15 @@ const Ticket = db.define<TicketAttr>(
 			type: DataTypes.BIGINT,
 			allowNull: true
 		},
+		clientId: DataTypes.UUID,
+		userId: {
+			type: DataTypes.UUID,
+			allowNull: false
+		},
+		shiftId: {
+			type: DataTypes.UUID,
+			allowNull: false	
+		},
 		amount: {
 			type: DataTypes.FLOAT,
 			allowNull: false
@@ -30,6 +41,11 @@ const Ticket = db.define<TicketAttr>(
 			allowNull: false,
 			defaultValue: 0
 		},
+		orderType: {
+			type: DataTypes.ENUM('DELIVERY', 'PICKUP'),
+			allowNull: false
+		},
+		shippingAddress: DataTypes.STRING,
 		status: {
 			type: DataTypes.STRING,
 			allowNull: false,
@@ -60,8 +76,10 @@ const Ticket = db.define<TicketAttr>(
 	}
 );
 
+Ticket.belongsTo(Client, { foreignKey: 'clientId' });
 Ticket.belongsTo(User, { foreignKey: 'userId' });
 Ticket.belongsTo(Shift, { foreignKey: 'shiftId' });
 Ticket.hasMany(TicketProduct, { foreignKey: 'ticketId', as: 'products' });
+Ticket.hasMany(TicketPayment, { foreignKey: 'ticketId', as: 'payments' });
 
 export { Ticket };

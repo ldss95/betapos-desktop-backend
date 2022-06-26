@@ -5,15 +5,19 @@ import { Ticket } from './model';
 import { TicketProduct } from '../ticket-products/model';
 import { Meta } from '../meta/model';
 import { sendToAPI } from '../sync/controller'
+import { TicketPayment } from '../ticket-payments/model';
 
 export default {
 	create: async (req: Request, res: Response) => {
 		try {
-			const { ticket, products } = req.body;
+			const { ticket, products, payments } = req.body;
 			ticket.userId = req.session!.user.id;
 
-			const results = await Ticket.create({ ...ticket, products }, {
-				include: { model: TicketProduct, as: 'products' }
+			const results = await Ticket.create({ ...ticket, products, payments }, {
+				include: [
+					{ model: TicketProduct, as: 'products' },
+					{ model: TicketPayment, as: 'payments' }
+				]
 			});
 
 			const savedTicket = results.get({ plain: true })
