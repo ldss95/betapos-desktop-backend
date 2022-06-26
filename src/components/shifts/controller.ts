@@ -207,7 +207,10 @@ export default {
 			if (!resWasSended) {
 				res.sendStatus(500);
 			}
-			throw error;
+
+			if(!axios.isAxiosError(error)) {
+				throw error;
+			}
 		}
 	}
 };
