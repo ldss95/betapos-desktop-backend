@@ -5,6 +5,7 @@ import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '../db/firebase'
 import { Product, Barcode } from '../components/products/model'
 import { User } from '../components/users/model'
+import { Client } from '../components/clients/model'
 import { Update } from '../components/update/model'
 import { Business } from '../components/business/model'
 import { Meta } from '../components/meta/model'
@@ -91,7 +92,9 @@ async function listen() {
 				}
 			})
 		} catch (error) {
-			throw error;
+			if(!axios.isAxiosError(error)){
+				throw error;
+			}
 		}
 	}, (error: any) => {
 		throw error
@@ -156,9 +159,11 @@ async function listen() {
 				where: { table: 'barcodes' }
 			})
 		} catch (error) {
-			throw error;
+			if(!axios.isAxiosError(error)){
+				throw error;
+			}
 		}
-	}, (error: any) => {
+	}, (error) => {
 		throw error
 	})
 
@@ -221,7 +226,9 @@ async function listen() {
 				where: { table: 'users' }
 			})
 		} catch (error) {
-			throw error;
+			if(!axios.isAxiosError(error)){
+				throw error;
+			}
 		}
 	}, (error: any) => {
 		throw error
@@ -275,6 +282,10 @@ async function listen() {
 					{
 						table: 'devices',
 						date: res.data.createdAt
+					},
+					{
+						table: 'clients',
+						date: res.data.createdAt
 					}
 				], { ignoreDuplicates: true })
 
@@ -298,7 +309,9 @@ async function listen() {
 				where: { table: 'business' }
 			})
 		} catch (error) {
-			throw error;
+			if(!axios.isAxiosError(error)){
+				throw error;
+			}
 		}
 	}, (error: any) => {
 		throw error
@@ -356,13 +369,82 @@ async function listen() {
 				where: { table: 'devices' }
 			})
 		} catch (error) {
-			throw error;
+			if(!axios.isAxiosError(error)){
+				throw error;
+			}
 		}
 	}, (error: any) => {
 		throw error
 	})
 
 	unsubscribers.push(devicesUnsubscribers)
+
+	const clientsRef = doc(db, MERCHANT_ID, 'clients')
+	const clientsUnsubscribers = onSnapshot(clientsRef, async (doc) => {
+		try {
+			const data: any = doc.data();
+			if (!data) {
+				return;
+			}
+
+			// Usuarios eliminados
+			const { deleted, lastUpdate } = data;
+			if (deleted && deleted.length > 0) {
+				Client.destroy({
+					where: {
+						id: {
+							[Op.in]: deleted
+						}
+					}
+				})
+			}
+
+			const update = await Update.findOne({
+				where: { table: 'clients' }
+			})
+
+			if(!update){
+				await Update.create({ table: 'clients' })
+			}
+
+			if(update?.date == lastUpdate){
+				return;
+			}
+
+			const { data: { created, updated } } = await axios.get(
+				`${API_URL}/clients/updates/${update?.date || 'ALL'}`,
+				{
+					headers: {
+						merchantId: MERCHANT_ID!
+					}
+				}
+			);
+
+			// Usuarios modificados
+			for(const client of updated){
+				await Client.update(client, {
+					where: {
+						id: client.id
+					}
+				})
+			}
+
+			// Usuarios nuevos
+			await Client.bulkCreate(created, { ignoreDuplicates: true });
+
+			await Update.update({ date: lastUpdate }, {
+				where: { table: 'clients' }
+			})
+		} catch (error) {
+			if(!axios.isAxiosError(error)){
+				throw error;
+			}
+		}
+	}, (error: any) => {
+		throw error
+	})
+
+	unsubscribers.push(clientsUnsubscribers)
 }
 
 export { listen }
