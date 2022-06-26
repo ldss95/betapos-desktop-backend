@@ -14,5 +14,6 @@ declare namespace NodeJS {
 		SMTP_USERNAME: string;
 		SMTP_PASSWORD: string;
 		NOTIFICATIONS_EMAIL: string;
+		SENTRY_DSN: string;
 	}
 }

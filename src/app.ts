@@ -1,11 +1,12 @@
 import express, { Express } from 'express';
 import session from 'express-session';
 const MySqlStore = require('express-mysql-session')(session);
-const Sentry = require('@sentry/node');
+import * as Sentry from "@sentry/node";
+import * as Tracing from "@sentry/tracing";
 import cors from 'cors';
 import 'dotenv/config';
 
-const { NODE_ENV } = process.env;
+const { NODE_ENV, SENTRY_DSN } = process.env;
 import { listen } from './utils/listener';
 import routes from './routes';
 const app: Express = express();
@@ -42,15 +43,18 @@ app.use(
 );
 
 //Error Tracking Sentry
-if (NODE_ENV == 'production')
-	Sentry.init({
-		dsn:
-			'https://d33b3cbc04e848faa9f54774ebe3557c@o327190.ingest.sentry.io/5424305'
-	});
+Sentry.init({
+	environment: NODE_ENV,
+	dsn: SENTRY_DSN,
+	integrations: [
+		new Sentry.Integrations.Http({ tracing: true }),
+		new Tracing.Integrations.Express({ app }),
+	],
+	tracesSampleRate: 1.0,
+});
 
 //Middlewares
-if (NODE_ENV == 'production')
-	app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.requestHandler());
 
 if(NODE_ENV == 'development'){
 	const morgan = require('morgan');
@@ -64,7 +68,6 @@ listen()
 app.use(routes);
 
 //Error Tracking Sentry
-if (NODE_ENV == 'production')
-	app.use(Sentry.Handlers.errorHandler());
+app.use(Sentry.Handlers.errorHandler());
 
 export default app;
