@@ -27,6 +27,7 @@ const TicketProduct = db.define<TicketProductAttr>(
 			allowNull: false,
 			defaultValue: 1
 		},
+		cost: DataTypes.FLOAT,
 		price: {
 			type: DataTypes.FLOAT,
 			allowNull: false

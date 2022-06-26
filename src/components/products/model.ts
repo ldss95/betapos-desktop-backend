@@ -27,8 +27,17 @@ const Product = db.define<ProductAttr>(
 				isUrl: true
 			}
 		},
+		cost: DataTypes.FLOAT,
 		price: {
 			type: DataTypes.FLOAT,
+			allowNull: false
+		},
+		itbis: {
+			type: DataTypes.BOOLEAN,
+			allowNull: false
+		},
+		isFractionable: {
+			type: DataTypes.BOOLEAN,
 			allowNull: false
 		}
 	},
