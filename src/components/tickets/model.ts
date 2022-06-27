@@ -8,6 +8,7 @@ import { Shift } from '../shifts/model';
 import { TicketProduct } from '../ticket-products/model';
 import { TicketPayment } from '../ticket-payments/model';
 import { Meta } from '../meta/model';
+import { TicketPaymentType } from '../ticket-payments-types/model';
 
 const Ticket = db.define<TicketAttr>(
 	'Ticket',
@@ -45,6 +46,10 @@ const Ticket = db.define<TicketAttr>(
 			type: DataTypes.ENUM('DELIVERY', 'PICKUP'),
 			allowNull: false
 		},
+		paymentTypeId: {
+			type: DataTypes.UUID,
+			allowNull: false
+		},
 		shippingAddress: DataTypes.STRING,
 		status: {
 			type: DataTypes.STRING,
@@ -79,6 +84,7 @@ const Ticket = db.define<TicketAttr>(
 Ticket.belongsTo(Client, { foreignKey: 'clientId' });
 Ticket.belongsTo(User, { foreignKey: 'userId' });
 Ticket.belongsTo(Shift, { foreignKey: 'shiftId' });
+Ticket.belongsTo(TicketPaymentType, { foreignKey: 'paymentTypeId' });
 Ticket.hasMany(TicketProduct, { foreignKey: 'ticketId', as: 'products' });
 Ticket.hasMany(TicketPayment, { foreignKey: 'ticketId', as: 'payments' });
 

@@ -11,6 +11,7 @@ export interface TicketAttr extends Model {
 	status: 'IN PROCESS' | 'DONE' | 'PAUSED' | 'CANCELLED';
 	products?: TicketProductAttr[];
 	payments: TicketPaymentAttr[];
+	paymentTypeId: string;
 	orderType: 'DELIVERY' | 'PICKUP';
 	shippingAddress?: string;
 	createdAt?: string;
