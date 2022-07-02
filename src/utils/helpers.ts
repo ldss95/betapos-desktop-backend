@@ -1,38 +1,5 @@
-import nodemailer from 'nodemailer'
 import { ReadStream } from 'fs'
 import aws from 'aws-sdk'
-
-const transporter = nodemailer.createTransport({
-	port: 465,
-	secure: true,
-	host: process.env.SMTP_SERVER,
-	auth: {
-		user: process.env.SMTP_USERNAME,
-		pass: process.env.SMTP_PASSWORD
-	}
-})
-
-interface msgAttr {
-	from?: string;
-	to: string;
-	subject: string;
-	html: string;
-	attachments?: {
-		filename: string;
-		path?: string;
-		href?: string; 
-	}[];
-}
-
-function sendMessage(msg: msgAttr) {
-	msg.from = `ZECONOMY <${process.env.NOTIFICATIONS_EMAIL}>`
-	
-	transporter.sendMail(msg, (error) => {
-		if (error) {
-			throw error
-		}
-	})
-}
 
 /**
  * Asynchronously upload file to Digital Ocean Spaces
@@ -66,4 +33,4 @@ function uploadFile(path: string, fileName: string, content: ReadStream | File, 
 	})
 }
 
-export { sendMessage, uploadFile };
+export { uploadFile };

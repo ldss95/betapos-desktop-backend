@@ -2,8 +2,6 @@ import { Request, Response } from 'express';
 import moment from 'moment';
 import 'moment/locale/es'
 import { fn, col } from 'sequelize'
-import path from 'path'
-import sid from 'shortid'
 import axios from 'axios'
 
 import { Shift } from './model';
@@ -11,11 +9,8 @@ import { Ticket } from '../tickets/model'
 import { Meta } from '../meta/model'
 import { CashFlow } from '../cash-flow/model'
 import { sendToAPI } from '../sync/controller'
-import { sendMessage, uploadFile } from '../../utils/helpers';
-import { format, pdf } from '@ldss95/helpers'
 
 moment.locale('es')
-const API_URL = process.env.API_URL;
 
 export default {
 	create: async (req: Request, res: Response) => {
@@ -93,8 +88,7 @@ export default {
 	finishShift: async (req: Request, res: Response) => {
 		let resWasSended = false
 		try {
-			const { shift, endAmount, cashDetail, shopName, sellerName } = req.body;
-			const todayDate = moment().format('YYYY-MM-DD')
+			const { shift, endAmount, cashDetail } = req.body;
 			const endTime = moment().format('HH:mm:ss')
 
 			await Shift.update(
@@ -145,64 +139,6 @@ export default {
 				isNew: true,
 				callback: () => { }
 			})
-
-			/**
-				Send Email with pdf
-			*/
-			
-			const filename = `Cierre ${shopName} ${sid.generate()}.pdf`
-			const mismatch = endAmount - (sold.sold - sold.discount + shift.startAmount + incomeAmount- expensesAmount)
-
-			const stream = await pdf.toStream(
-				path.join(__dirname, '../../templates/shift_end.hbs'),
-				{
-					shopName,
-					date: moment().format('dddd DD MMMM YYYY'),
-					sellerName,
-					startTime: moment(shift.startTime).format('hh:mm:ss A'),
-					endTime: moment(`${todayDate} ${endTime}`).format('hh:mm:ss A'),
-					currentShift: {
-						totalSold: format.cash(sold.sold - sold.discount),
-						startCash: format.cash(shift.startAmount),
-						cashIn: format.cash(incomeAmount),
-						cashOut: format.cash(expensesAmount),
-						endAmount: format.cash(endAmount),
-						mismatch: format.cash(mismatch),
-						...(mismatch) && {
-							mismatchSymbol: (mismatch < 0) ? '-': '+',
-							mismatchClass: (mismatch < 0) ? 'missing': 'surplus'
-						}
-					},
-					...(incomeAmount) && {
-						income: {
-							total: format.cash(incomeAmount),
-							records: cashFlow.filter(item => item.type == 'IN').map(item => ({ ...item, amount: format.cash(item.amount) }))
-						}
-					},
-					...(expensesAmount) && {
-						expenses: {
-							total: format.cash(expensesAmount),
-							records: cashFlow.filter(item => item.type == 'OUT').map(item => ({ ...item, amount: format.cash(item.amount) }))
-						}
-					}
-				}
-			)
-
-			const url = await uploadFile('shifts/', filename, stream, 'application/pdf')
-
-			const { data } = await axios.get(API_URL + '/settings')
-
-			if (data.sendEmails) {
-				sendMessage({
-					html: '',
-					to: data.sendEmails.join(','),
-					subject: `${shopName} ${moment().format('DD / MMMM / YYYY')}`,
-					attachments: [{
-						href: url,
-						filename
-					}]
-				})
-			}
 		} catch (error) {
 			if (!resWasSended) {
 				res.sendStatus(500);
