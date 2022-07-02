@@ -61,6 +61,11 @@ const Ticket = db.define<TicketAttr>(
 	},
 	{
 		hooks: {
+			afterCreate: ({ id }) => {
+				if (id) {
+					// printTicket(id)
+				}
+			},
 			beforeCreate: async (model: any) => {
 				try {
 					const max = await Ticket.max('ticketNumber');
