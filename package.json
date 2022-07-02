@@ -4,10 +4,9 @@
   "description": "",
   "main": "src/server.ts",
   "scripts": {
-    "build": "tsc && npm run copy-templates",
+    "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "nodemon",
-    "copy-templates": "cp -r src/templates dist/"
+    "dev": "nodemon"
   },
   "repository": {
     "type": "git",
