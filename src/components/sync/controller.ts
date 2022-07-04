@@ -111,20 +111,23 @@ const sendToAPI = (input: SendToApiInput) => {
 	const client = (isProduction) ? https : http;
 	
 	// Get hostname, remove protocol and separate port from hostname
-	let hostname = API_URL!.replace('https://', '').replace('http://', '')
+	let hostname = API_URL!
+		.replace('https://', '')
+		.replace('http://', '')
+		.replace('/api', '')
 	let port: number;
 	if (hostname.includes(':')) {
 		const portIndicatorIndex = hostname.indexOf(':')
 		port = Number(hostname.substr(portIndicatorIndex + 1))
 		hostname = hostname.substr(0, portIndicatorIndex)
 	} else {
-		port = (isProduction) ? 443: 80
+		port = (API_URL!.includes('https')) ? 443: 80
 	}
 
 	const options = {
 		hostname,
 		port,
-		path,
+		path: '/api' + path,
 		method,
 		headers: {
 			'Content-Type': 'application/json',
