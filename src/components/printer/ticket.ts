@@ -1,6 +1,7 @@
+import axios from 'axios';
+
 import { Ticket } from '../tickets/model'
 import { TicketProduct } from '../ticket-products/model'
-import axios from 'axios';
 import { Business } from '../business/model';
 import { Client } from '../clients/model';
 import { User } from '../users/model';
@@ -13,7 +14,6 @@ import { TicketPaymentType } from '../ticket-payments-types/model';
  */
 async function printTicket (id: string) {
 	try {
-		console.log('Imprimiendo')
 		if (!id) {
 			throw new Error('El id de la factura es requerido');
 		}
@@ -49,7 +49,7 @@ async function printTicket (id: string) {
 
 		const business = await Business.findOne()!;
 		
-		const { data } = await axios.post('http://localhost/modulos/ventas/print_ticket.php', {
+		await axios.post('http://localhost/modulos/ventas/print_ticket.php', {
 			business: {
 				name: business?.name,
 				address: business?.address,
@@ -61,6 +61,7 @@ async function printTicket (id: string) {
 					name: ticket.client.name
 				}
 			},
+			shippingAddress: ticket.shippingAddress,
 			seller: {
 				name: `${ticket.seller.firstName} ${ticket.seller.lastName}`
 			},
