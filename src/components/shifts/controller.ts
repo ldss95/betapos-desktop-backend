@@ -88,20 +88,21 @@ export default {
 	finishShift: async (req: Request, res: Response) => {
 		let resWasSended = false
 		try {
-			const { shift, endAmount, cashDetail } = req.body;
+			const { shift: { id }, endAmount, cashDetail } = req.body;
+
+			const shift = await Shift.findByPk(id);
+			if (!shift) {
+				return res.status(400).send({
+					message: 'Turno no encontrado'
+				})
+			}
+
 			const endTime = moment().format('HH:mm:ss')
-
-			await Shift.update(
-				{
-					endAmount,
-					cashDetail,
-					endTime
-				},
-				{ where: { id: shift.id } }
-			)
-
-			res.sendStatus(204)
-			resWasSended = true
+			await shift.update({
+				endAmount,
+				cashDetail,
+				endTime
+			})
 
 			/**
 				Get Shift data
@@ -118,6 +119,29 @@ export default {
 			const cashFlow = await CashFlow.findAll({ where: { shiftId: shift.id }, raw: true })
 			const incomeAmount = cashFlow.filter(item => item.type == 'IN').reduce((sum, item) => sum + item.amount, 0)
 			const expensesAmount = cashFlow.filter(item => item.type == 'OUT').reduce((sum, item) => sum + item.amount, 0)
+			const results = endAmount - (shift.startAmount + sold.sold - sold.discount + incomeAmount - expensesAmount);
+
+			res.status(200).send({
+				results,
+				...(results > 0) && {
+					mainClass: 'info',
+					mainTitle: 'Sobrante'
+				},
+				...(results < 0) && {
+					mainClass: 'danger',
+					mainTitle: 'Faltante'
+				},
+				...(results == 0) && {
+					mainTitle: 'Sin Diferencias'
+				},
+				sold: sold.sold,
+				discount: sold.discount,
+				expenses: expensesAmount,
+				income: incomeAmount,
+				amount: endAmount
+			})
+			resWasSended = true
+
 			const meta = await Meta.findOne();
 			sendToAPI({
 				deviceId: meta?.device?.deviceId!,

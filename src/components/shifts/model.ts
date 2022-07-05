@@ -58,6 +58,6 @@ const Shift = db.define<ShiftAttr>(
 	}
 );
 
-Shift.belongsTo(User, { foreignKey: 'userId' });
+Shift.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 export { Shift };
