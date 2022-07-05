@@ -87,5 +87,6 @@ Ticket.belongsTo(Shift, { foreignKey: 'shiftId' });
 Ticket.belongsTo(TicketPaymentType, { foreignKey: 'paymentTypeId', as: 'paymentType' });
 Ticket.hasMany(TicketProduct, { foreignKey: 'ticketId', as: 'products' });
 Ticket.hasMany(TicketPayment, { foreignKey: 'ticketId', as: 'payments' });
+TicketPayment.belongsTo(Ticket, { foreignKey: 'ticketId', as: 'ticket' });
 
 export { Ticket };

@@ -1,3 +1,4 @@
-import { printTicket } from './ticket'
+import { printTicket } from './ticket';
+import { printShift } from './shift';
 
-export { printTicket }
+export { printTicket, printShift }

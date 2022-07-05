@@ -10,6 +10,8 @@ router
 	.get(isLoggedIn, checkToken, controller.getAll)
 	.put(isLoggedIn, checkToken, controller.finishShift);
 
+router.post('/print/:id', isLoggedIn, checkToken, controller.print)
+
 router.get(
 	'/current',
 	isLoggedIn,

@@ -9,6 +9,7 @@ import { Ticket } from '../tickets/model'
 import { Meta } from '../meta/model'
 import { CashFlow } from '../cash-flow/model'
 import { sendToAPI } from '../sync/controller'
+import { printShift } from '../printer'
 
 moment.locale('es')
 
@@ -172,5 +173,10 @@ export default {
 				throw error;
 			}
 		}
+	},
+	print: (req: Request, res: Response) => {
+		const { id } = req.params;
+		printShift(id);
+		res.sendStatus(204);
 	}
 };
