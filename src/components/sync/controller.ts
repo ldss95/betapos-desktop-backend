@@ -127,7 +127,9 @@ const sendToAPI = (input: SendToApiInput) => {
 	const options = {
 		hostname,
 		port,
-		path: '/api' + path,
+		path: isProduction
+			? '/api' + path
+			: path,
 		method,
 		headers: {
 			'Content-Type': 'application/json',
