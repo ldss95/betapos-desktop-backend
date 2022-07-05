@@ -6,6 +6,7 @@ import { TicketProduct } from '../ticket-products/model';
 import { Meta } from '../meta/model';
 import { sendToAPI } from '../sync/controller'
 import { TicketPayment } from '../ticket-payments/model';
+import { printTicket } from '../printer';
 
 export default {
 	create: async (req: Request, res: Response) => {
@@ -38,7 +39,9 @@ export default {
 				callback: () => { }
 			});
 
-			res.sendStatus(201);
+			res.status(201).send({
+				id: results.id
+			});
 		} catch (error) {
 			res.sendStatus(500);
 			throw error;
@@ -62,5 +65,10 @@ export default {
 				res.sendStatus(500);
 				throw error;
 			});
+	},
+	print: (req: Request, res: Response) => {
+		const { id } = req.params;
+		printTicket(id);
+		res.sendStatus(204);
 	}
 };

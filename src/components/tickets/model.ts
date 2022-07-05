@@ -9,7 +9,6 @@ import { TicketProduct } from '../ticket-products/model';
 import { TicketPayment } from '../ticket-payments/model';
 import { Meta } from '../meta/model';
 import { TicketPaymentType } from '../ticket-payments-types/model';
-import { printTicket } from '../printer/index'
 
 const Ticket = db.define<TicketAttr>(
 	'Ticket',
@@ -62,11 +61,6 @@ const Ticket = db.define<TicketAttr>(
 	},
 	{
 		hooks: {
-			afterCreate: ({ id }) => {
-				if (id) {
-					printTicket(id)
-				}
-			},
 			beforeCreate: async (model: any) => {
 				try {
 					const max = await Ticket.max('ticketNumber');
