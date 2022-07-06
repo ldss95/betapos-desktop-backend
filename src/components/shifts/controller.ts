@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import moment from 'moment';
 import 'moment/locale/es'
-import { fn, col } from 'sequelize'
+import { fn, col, Op } from 'sequelize'
 import axios from 'axios'
 
 import { Shift } from './model';
@@ -10,6 +10,8 @@ import { Meta } from '../meta/model'
 import { CashFlow } from '../cash-flow/model'
 import { sendToAPI } from '../sync/controller'
 import { printShift } from '../printer'
+import { TicketPayment } from '../ticket-payments/model';
+import { TicketPaymentType } from '../ticket-payments-types/model';
 
 moment.locale('es')
 
@@ -108,8 +110,13 @@ export default {
 			/**
 				Get Shift data
 			*/
-			const sold: any = await Ticket.findOne({
-				where: { shiftId: shift.id },
+			const { sold, discount }: any = await Ticket.findOne({
+				where: {
+					[Op.and]: [
+						{ shiftId: shift.id },
+						{ status: 'DONE' }
+					]
+				},
 				attributes: [
 					[fn('coalesce', fn('sum', col('amount')), 0), 'sold'],
 					[fn('coalesce', fn('sum', col('discount')), 0), 'discount']
@@ -117,10 +124,46 @@ export default {
 				raw: true
 			})
 
+			const payments = await TicketPayment.findAll({
+				include: {
+					model: Ticket,
+					as: 'ticket',
+					where: {
+						[Op.and]: [
+							{ shiftId: shift.id },
+							{ status: 'DONE' }
+						]
+					},
+					required: true
+				}
+			})
+	
+			const paymentTypes = await TicketPaymentType.findAll();
+			const PAYMENT_ID: any = {
+				'Efectivo': '',
+				'Tarjeta': '',
+				'Fiao': ''
+			}
+			for (const { name, id } of paymentTypes){
+				PAYMENT_ID[name] = id;
+			}
+
 			const cashFlow = await CashFlow.findAll({ where: { shiftId: shift.id }, raw: true })
-			const incomeAmount = cashFlow.filter(item => item.type == 'IN').reduce((sum, item) => sum + item.amount, 0)
-			const expensesAmount = cashFlow.filter(item => item.type == 'OUT').reduce((sum, item) => sum + item.amount, 0)
-			const results = endAmount - (shift.startAmount + sold.sold - sold.discount + incomeAmount - expensesAmount);
+			const amounts = {
+				expenses: cashFlow.filter(item => item.type == 'OUT').reduce((sum, item) => sum + item.amount, 0),
+				income: cashFlow.filter(item => item.type == 'IN').reduce((sum, item) => sum + item.amount, 0),
+				cash: payments
+					.filter(({ typeId }) => typeId == PAYMENT_ID.Efectivo)
+					.reduce((total, { amount }) => total + amount, 0),
+				credit: payments
+					.filter(({ typeId }) => typeId == PAYMENT_ID.Fiao)
+					.reduce((total, { amount }) => total + amount, 0),
+				card: payments
+					.filter(({ typeId }) => typeId == PAYMENT_ID.Tarjeta)
+					.reduce((total, { amount }) => total + amount, 0)
+			}
+			const results = (shift.endAmount || 0) - (shift.startAmount + amounts.cash - discount + amounts.income - amounts.expenses);
+
 
 			res.status(200).send({
 				results,
@@ -135,10 +178,10 @@ export default {
 				...(results == 0) && {
 					mainTitle: 'Sin Diferencias'
 				},
-				sold: sold.sold,
-				discount: sold.discount,
-				expenses: expensesAmount,
-				income: incomeAmount,
+				sold,
+				discount,
+				expenses: amounts.expenses,
+				income: amounts.income,
 				amount: endAmount
 			})
 			resWasSended = true
@@ -153,9 +196,9 @@ export default {
 						id: shift.id,
 						endCash: endAmount,
 						cashDetail,
-						cashIn: incomeAmount,
-						cashOut: expensesAmount,
-						totalSold: sold.sold - sold.discount,
+						cashIn: amounts.income,
+						cashOut: amounts.expenses,
+						totalSold: sold - discount,
 						endTime
 					}
 				},

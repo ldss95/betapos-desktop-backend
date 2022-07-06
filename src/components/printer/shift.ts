@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { fn, col } from 'sequelize';
+import { fn, col, Op } from 'sequelize';
 
 import { Shift } from '../shifts/model';
 import { Business } from '../business/model';
@@ -36,7 +36,12 @@ async function printShift (id: string) {
 			Get Shift data
 		*/
 		const { sold, discount }: any = await Ticket.findAll({
-			where: { shiftId: shift.id },
+			where: { 
+				[Op.and]: [
+					{ shiftId: shift.id },
+					{ status: 'DONE' }
+				]
+			},
 			attributes: [
 				[fn('coalesce', fn('sum', col('amount')), 0), 'sold'],
 				[fn('coalesce', fn('sum', col('discount')), 0), 'discount']
@@ -48,7 +53,12 @@ async function printShift (id: string) {
 			include: {
 				model: Ticket,
 				as: 'ticket',
-				where: { shiftId: shift.id },
+				where: {
+					[Op.and]: [
+						{ shiftId: shift.id },
+						{ status: 'DONE' }
+					]
+				},
 				required: true
 			}
 		})
