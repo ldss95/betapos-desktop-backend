@@ -162,8 +162,8 @@ export default {
 					.filter(({ typeId }) => typeId == PAYMENT_ID.Tarjeta)
 					.reduce((total, { amount }) => total + amount, 0)
 			}
-			const results = (shift.endAmount || 0) - (shift.startAmount + amounts.cash - discount + amounts.income - amounts.expenses);
 
+			const results = (shift.endAmount || 0) - (shift.startAmount + amounts.cash - discount + amounts.income - amounts.expenses);
 
 			res.status(200).send({
 				results,

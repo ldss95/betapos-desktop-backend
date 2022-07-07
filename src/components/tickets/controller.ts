@@ -7,6 +7,8 @@ import { Meta } from '../meta/model';
 import { sendToAPI } from '../sync/controller'
 import { TicketPayment } from '../ticket-payments/model';
 import { printTicket } from '../printer';
+import { TicketPaymentType } from '../ticket-payments-types/model';
+import { Client } from '../clients/model';
 
 export default {
 	create: async (req: Request, res: Response) => {
@@ -48,10 +50,17 @@ export default {
 		}
 	},
 	getOne: (req: Request, res: Response) => {
-		const { ticketNumber } = req.params;
+		const { ticketNumber, id } = req.params;
 
 		Ticket.findOne({
-			where: { ticketNumber },
+			where: {
+				...(ticketNumber) && {
+					ticketNumber
+				},
+				...(id) && {
+					id
+				}
+			},
 			include: [
 				{
 					model: TicketProduct,
@@ -65,6 +74,28 @@ export default {
 				res.sendStatus(500);
 				throw error;
 			});
+	},
+	getAll4Shift: (req: Request, res: Response) => {
+		const { shiftId } = req.query;
+		Ticket.findAll({
+			where: { shiftId },
+			include: [
+				{
+					model: TicketPaymentType,
+					as: 'paymentType'
+				},
+				{
+					model: Client,
+					as: 'client'
+				}
+			],
+			order: [['createdAt', 'DESC']]
+		})
+			.then((tickets) => res.status(200).send(tickets))
+			.catch(error => {
+				res.sendStatus(500);
+				throw error;
+			})
 	},
 	print: (req: Request, res: Response) => {
 		const { id } = req.params;
