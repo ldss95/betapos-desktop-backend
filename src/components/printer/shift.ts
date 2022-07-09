@@ -35,7 +35,7 @@ async function printShift (id: string) {
 		/**
 			Get Shift data
 		*/
-		const { sold, discount }: any = await Ticket.findAll({
+		const { sold, discount, ...props }: any = await Ticket.findOne({
 			where: { 
 				[Op.and]: [
 					{ shiftId: shift.id },
