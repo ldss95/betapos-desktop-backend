@@ -75,6 +75,50 @@ export default {
 				throw error;
 			});
 	},
+	removeProduct: async (req: Request, res: Response) => {
+		try {
+			const { id } = req.params;
+			const config = {
+				where: {
+					id
+				}
+			}
+
+			const product = await TicketProduct.findOne(config);
+			if (!product) {
+				return res.sendStatus(204);
+			}
+
+			await product.destroy();
+			const ticket = await Ticket.findOne({
+				where: {
+					id: product.ticketId
+				}
+			})
+
+			await ticket?.update({
+				amount: ticket.amount - (product.quantity * product.price)
+			})
+
+			res.sendStatus(204)
+		} catch (error) {
+			res.sendStatus(500);
+			throw error;
+		}
+	},
+	cancelTicket: (req: Request, res: Response) => {
+		const { id } = req.params;
+		Ticket.update({ status: 'CANCELLED' }, {
+			where: {
+				id
+			}
+		})
+			.then(() => res.sendStatus(204))
+			.catch(error => {
+				res.sendStatus(500);
+				throw error;
+			})
+	},
 	getAll4Shift: (req: Request, res: Response) => {
 		const { shiftId } = req.query;
 		Ticket.findAll({

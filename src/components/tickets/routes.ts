@@ -24,4 +24,7 @@ router.get(
 	controller.getOne
 );
 
+router.delete('/product/:id', isLoggedIn, checkToken, controller.removeProduct)
+router.delete('/:id', isLoggedIn, checkToken, controller.cancelTicket)
+
 export default router;
