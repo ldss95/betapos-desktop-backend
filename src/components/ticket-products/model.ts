@@ -23,7 +23,7 @@ const TicketProduct = db.define<TicketProductAttr>(
 			allowNull: false
 		},
 		quantity: {
-			type: DataTypes.TINYINT,
+			type: DataTypes.FLOAT,
 			allowNull: false,
 			defaultValue: 1
 		},
