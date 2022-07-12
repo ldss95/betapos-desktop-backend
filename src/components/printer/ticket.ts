@@ -74,7 +74,7 @@ async function printTicket (id: string) {
 				itbis: product.itbis
 			})),
 			amount: ticket.amount,
-			discount: ticket.amount,
+			discount: ticket.discount,
 			itbis: ticket.products?.reduce((total, { quantity, price, product: { itbis } }) => total + (itbis ? (price * quantity / 100 * 18): 0), 0),
 			paymentTypeName: ticket.paymentType.name
 		})

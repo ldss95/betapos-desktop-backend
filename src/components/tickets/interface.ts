@@ -13,6 +13,7 @@ export interface TicketAttr extends Model {
 	client: ClientAttr;
 	userId: string;
 	seller: UserAttr;
+	discount: number;
 	amount: number;
 	status: 'IN PROCESS' | 'DONE' | 'PAUSED' | 'CANCELLED';
 	products?: TicketProductAttr[];
