@@ -194,7 +194,7 @@ export default {
 				data: {
 					shift: {
 						id: shift.id,
-						endCash: endAmount,
+						endAmount,
 						cashDetail,
 						cashIn: amounts.income,
 						cashOut: amounts.expenses,
