@@ -7,6 +7,7 @@ import { Client } from '../clients/model';
 import { User } from '../users/model';
 import { Product } from '../products/model';
 import { TicketPaymentType } from '../ticket-payments-types/model';
+import { TicketPayment } from '../ticket-payments/model';
 
 /**
  * Metodo para imprimir un ticket
@@ -39,6 +40,14 @@ async function printTicket (id: string) {
 				{
 					model: TicketPaymentType,
 					as: 'paymentType'
+				},
+				{
+					model: TicketPayment,
+					as: 'payments',
+					include: [{
+						model: TicketPaymentType,
+						as: 'type'
+					}]
 				}
 			]
 		});
@@ -48,6 +57,55 @@ async function printTicket (id: string) {
 		}
 
 		const business = await Business.findOne()!;
+
+		const change = () => {
+			if (!ticket.cashReceived) {
+				return null;
+			}
+
+			if (ticket.paymentType.name == 'Efectivo') {
+				return ticket.cashReceived - ticket.amount;
+			}
+
+			const cashPayment = ticket.payments.find(({ type }) => type.name == 'Efectivo')
+			if (!cashPayment) {
+				return null;
+			}
+
+			return ticket.cashReceived - cashPayment.amount;
+		}
+
+		console.log({
+			business: {
+				name: business?.name,
+				address: business?.address,
+				phone: business?.phone,
+				rnc: business?.rnc
+			},
+			...(ticket.clientId) && {
+				client: {
+					name: ticket.client.name
+				}
+			},
+			shippingAddress: ticket.shippingAddress,
+			seller: {
+				name: `${ticket.seller.firstName} ${ticket.seller.lastName}`
+			},
+			ticketNumber: ticket.ticketNumber,
+			date: ticket.createdAt,
+			products: ticket.products?.map(({ quantity, price, product }) => ({
+				quantity,
+				price,
+				name: product.name,
+				itbis: product.itbis
+			})),
+			amount: ticket.amount,
+			discount: ticket.discount,
+			itbis: ticket.products?.reduce((total, { quantity, price, product: { itbis } }) => total + (itbis ? (price * quantity / 100 * 18): 0), 0),
+			paymentTypeName: ticket.paymentType.name,
+			cashReceived: ticket.cashReceived,
+			change: change()
+		});
 		
 		await axios.post('http://localhost/modulos/ventas/print_ticket.php', {
 			business: {
@@ -76,7 +134,9 @@ async function printTicket (id: string) {
 			amount: ticket.amount,
 			discount: ticket.discount,
 			itbis: ticket.products?.reduce((total, { quantity, price, product: { itbis } }) => total + (itbis ? (price * quantity / 100 * 18): 0), 0),
-			paymentTypeName: ticket.paymentType.name
+			paymentTypeName: ticket.paymentType.name,
+			cashReceived: ticket.cashReceived,
+			change: change()
 		})
 	} catch (error) {
 		throw error;

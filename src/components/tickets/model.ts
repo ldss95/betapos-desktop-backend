@@ -51,6 +51,7 @@ const Ticket = db.define<TicketAttr>(
 			allowNull: false
 		},
 		shippingAddress: DataTypes.STRING,
+		cashReceived: DataTypes.INTEGER,
 		status: {
 			type: DataTypes.STRING,
 			allowNull: false,

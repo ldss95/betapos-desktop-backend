@@ -22,6 +22,7 @@ export interface TicketAttr extends Model {
 	paymentType: TicketPaymentTypeAttr;
 	orderType: 'DELIVERY' | 'PICKUP';
 	shippingAddress?: string;
+	cashReceived?: number;
 	createdAt?: string;
 	updatedAt?: string;
 }
