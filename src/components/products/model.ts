@@ -41,7 +41,7 @@ const Product = db.define<ProductAttr>(
 			allowNull: false
 		}
 	},
-	{ timestamps: false }
+	{ timestamps: false, paranoid: true }
 );
 
 const Barcode = db.define<BarcodeAttr>(
