@@ -8,8 +8,23 @@ import { MetaAttr } from './interface'
 
 const Meta = db.define<MetaAttr>('Meta', {
 	device: {
-		type: DataTypes.JSON,
-		allowNull: false
+		type: DataTypes.STRING,
+		allowNull: false,
+		get: function() {
+			const value = this.getDataValue('device');
+			if (!value) {
+				return {};
+			}
+
+			return JSON.parse(value);
+		},
+		set: function(value: object) {
+			if (value) {
+				this.setDataValue('device', JSON.stringify(value))
+			} else {
+				this.setDataValue('device', JSON.stringify({}))
+			}
+		}
 	},
 	lastTicketNumber: {
 		type: DataTypes.BIGINT,
